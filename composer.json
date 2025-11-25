@@ -10,7 +10,9 @@
 		"files": [
 			"helpers/debug.php",
 			"helpers/path.php",
-			"helpers/file.php"
+			"helpers/file.php",
+			"helpers/config.php",
+			"helpers/env.php"
 		]
 	},
 	"authors": [
@@ -20,5 +22,7 @@
 		}
 	],
 	"minimum-stability": "stable",
-	"require": {}
+	"require": {
+		"vlucas/phpdotenv": "^5.6"
+	}
 }

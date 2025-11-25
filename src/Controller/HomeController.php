@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Http\Response;
+use App\Http\Message\Response;
 
 class HomeController
 {

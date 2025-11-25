@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Http;
+namespace App\Http\Handler;
 
+use App\Http\Contracts\MiddlewareInterface;
+use App\Http\Message\Request;
+use App\Http\Message\Response;
 use Exception;
 
 class Router
@@ -12,6 +15,9 @@ class Router
   private array $paths = [];
   private array $enableMethods;
 
+  private string $currentMethod;
+  private string $currentPath;
+
   public function __construct(array $enableMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
   {
     $this->enableMethods = $enableMethods;
@@ -19,12 +25,12 @@ class Router
     $this->response = new Response();
   }
 
-  private function methodAllowed(string $httpMethod)
+  private function methodAllowed(string $httpMethod): bool
   {
     return \in_array($httpMethod, $this->enableMethods);
   }
 
-  public function __call(string $method, array $args): void
+  public function __call(string $method, array $args): self
   {
     $httpMethod = strtoupper($method);
     if (!$this->methodAllowed($httpMethod)) {
@@ -49,7 +55,9 @@ class Router
       throw new Exception("The method [{$method}] does not exist in class [{$controller}].", 500);
     }
 
-    $this->addRoute($httpMethod, $this->sanitizePath($path), $controller, $handler);
+    $this->addPath($httpMethod, $this->sanitizePath($path), $controller, $handler);
+
+    return $this;
   }
 
   private function sanitizePath(string $path): string
@@ -95,7 +103,7 @@ class Router
     return array_merge($requiredMatches[1], $optionalMatches[1]);
   }
 
-  private function addRoute(string $httpMethod, string $path, string $controller, string $handler): void
+  private function addPath(string $httpMethod, string $path, string $controller, string $handler): void
   {
     $this->checkOptionalParameters($path);
 
@@ -106,11 +114,43 @@ class Router
       }
     }
 
-    $this->paths[$httpMethod][$this->pathToRegex($path)] = [
+    $pathRegex = $this->pathToRegex($path);
+
+    $this->paths[$httpMethod][$pathRegex] = [
       'controller' => $controller,
       'handler' => $handler,
       'parameters' => $this->parameters($path)
     ];
+
+    $this->currentPath = $pathRegex;
+    $this->currentMethod = $httpMethod;
+  }
+
+  private function checkMiddlewareValidity(string $name): string
+  {
+    $all = config('middlewares');
+    if (!\in_array($name, array_keys($all))) {
+      throw new Exception("Middleware [{$name}] is not registered", 500);
+    }
+
+    $middleware = $all[$name];
+    if (!class_exists($middleware)) {
+      throw new Exception("The middleware class [{$middleware}] does not exist.t", 500);
+    }
+
+    $implements = class_implements($middleware);
+    if (!\in_array(MiddlewareInterface::class, $implements)) {
+      throw new Exception('The route middleware must implement ' . MiddlewareInterface::class, 500);
+    }
+
+    return $middleware;
+  }
+
+  public function addMiddleware(string ...$names): void
+  {
+    foreach ($names as $name) {
+      $this->paths[$this->currentMethod][$this->currentPath]['middlewares'][$name] = $this->checkMiddlewareValidity($name);
+    }
   }
 
   public function run()
@@ -130,8 +170,17 @@ class Router
         $controller = $matchPath['controller'];
         $handler = $matchPath['handler'];
         $parameters = $matchPath['parameters'];
+        $middlewares = $matchPath['middlewares'];
 
-        return (new $controller())->$handler($this->response, $this->request, $parameters)->send();
+        $response = (new Queue(
+          $middlewares
+        ))->dispatch(
+            $this->request,
+            $this->response,
+            fn(): Response => (new $controller())->$handler($this->response, $this->request, $parameters)
+          );
+
+        return $response->send();
       }
     }
 

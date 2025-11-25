@@ -20,7 +20,7 @@ function enclose(string $path): void
   include filepath($path);
 }
 
-function encloseOnce(string $path)
+function encloseOnce(string $path): void
 {
   include_once filepath($path);
 }
