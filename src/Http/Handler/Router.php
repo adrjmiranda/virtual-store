@@ -12,11 +12,13 @@ class Router
   private Request $request;
   private Response $response;
 
-  private array $paths = [];
+  public array $paths = [];
   private array $enableMethods;
 
   private string $currentMethod;
   private string $currentPath;
+
+  private string $prefix = '';
 
   public function __construct(array $enableMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
   {
@@ -54,6 +56,8 @@ class Router
     if (!method_exists($controller, $handler)) {
       throw new Exception("The method [{$method}] does not exist in class [{$controller}].", 500);
     }
+
+    $path = "{$this->prefix}/{$path}";
 
     $this->addPath($httpMethod, $this->sanitizePath($path), $controller, $handler);
 
@@ -151,6 +155,17 @@ class Router
     foreach ($names as $name) {
       $this->paths[$this->currentMethod][$this->currentPath]['middlewares'][$name] = $this->checkMiddlewareValidity($name);
     }
+  }
+
+  public function group(string $prefix): self
+  {
+    if (empty($prefix)) {
+      throw new Exception("The route prefix cannot be empty.", 500);
+    }
+
+    $this->prefix = $prefix;
+
+    return $this;
   }
 
   public function run()
