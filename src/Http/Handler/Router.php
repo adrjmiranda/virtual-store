@@ -12,13 +12,15 @@ class Router
   private Request $request;
   private Response $response;
 
-  public array $paths = [];
+  private array $paths = [];
   private array $enableMethods;
 
   private string $currentMethod;
   private string $currentPath;
 
   private string $prefix = '';
+
+  private static array $globalMiddlewares = [];
 
   public function __construct(array $enableMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
   {
@@ -130,6 +132,16 @@ class Router
     $this->currentMethod = $httpMethod;
   }
 
+  public function group(string $prefix): self
+  {
+    if (empty($prefix)) {
+      throw new Exception("The route prefix cannot be empty.", 500);
+    }
+    $this->prefix = $prefix;
+
+    return $this;
+  }
+
   private function checkMiddlewareValidity(string $name): string
   {
     $all = config('middlewares');
@@ -155,17 +167,16 @@ class Router
     foreach ($names as $name) {
       $this->paths[$this->currentMethod][$this->currentPath]['middlewares'][$name] = $this->checkMiddlewareValidity($name);
     }
+
+    $this->paths[$this->currentMethod][$this->currentPath]['middlewares'] = array_merge(
+      self::$globalMiddlewares,
+      $this->paths[$this->currentMethod][$this->currentPath]['middlewares'] ?? []
+    );
   }
 
-  public function group(string $prefix): self
+  public static function setGlobalMiddlewares(array $middlewares): void
   {
-    if (empty($prefix)) {
-      throw new Exception("The route prefix cannot be empty.", 500);
-    }
-
-    $this->prefix = $prefix;
-
-    return $this;
+    self::$globalMiddlewares = $middlewares;
   }
 
   public function run()

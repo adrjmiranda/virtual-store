@@ -13,6 +13,4 @@ $router->group('/')
   ->get('register', HomeController::class, 'index')
   ->addMiddleware('maintenance');
 
-dd($router->paths);
-
 $router->run();
