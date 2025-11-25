@@ -142,7 +142,7 @@ class Router
     return $this;
   }
 
-  private function checkMiddlewareValidity(string $name): string
+  private function correspondingMiddleware(string $name): string
   {
     $all = config('middlewares');
     if (!\in_array($name, array_keys($all))) {
@@ -165,7 +165,7 @@ class Router
   public function addMiddleware(string ...$names): void
   {
     foreach ($names as $name) {
-      $this->paths[$this->currentMethod][$this->currentPath]['middlewares'][$name] = $this->checkMiddlewareValidity($name);
+      $this->paths[$this->currentMethod][$this->currentPath]['middlewares'][$name] = $this->correspondingMiddleware($name);
     }
 
     $this->paths[$this->currentMethod][$this->currentPath]['middlewares'] = array_merge(
@@ -174,9 +174,11 @@ class Router
     );
   }
 
-  public static function setGlobalMiddlewares(array $middlewares): void
+  public function setGlobalMiddlewares(array $names): void
   {
-    self::$globalMiddlewares = $middlewares;
+    foreach ($names as $name) {
+      self::$globalMiddlewares[$name] = $this->correspondingMiddleware($name);
+    }
   }
 
   public function run()

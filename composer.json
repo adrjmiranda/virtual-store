@@ -15,6 +15,9 @@
 			"helpers/env.php"
 		]
 	},
+	"scripts": {
+		"view:log": "php scripts/view-log.php"
+	},
 	"authors": [
 		{
 			"name": "Adriano Miranda",

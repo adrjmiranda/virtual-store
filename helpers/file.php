@@ -1,8 +1,8 @@
 <?php
 
-function filepath(string $path): string
+function filepath(string $path, string $ext = 'php'): string
 {
-  return rootPath() . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $path) . '.php';
+  return rootPath() . DIRECTORY_SEPARATOR . str_replace('.', DIRECTORY_SEPARATOR, $path) . ".{$ext}";
 }
 
 function demand(string $path): void
