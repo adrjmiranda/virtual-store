@@ -5,8 +5,13 @@
 	"license": "MIT",
 	"autoload": {
 		"psr-4": {
-			"VirtualStore\\": "src/"
-		}
+			"App\\": "src/"
+		},
+		"files": [
+			"helpers/debug.php",
+			"helpers/path.php",
+			"helpers/file.php"
+		]
 	},
 	"authors": [
 		{

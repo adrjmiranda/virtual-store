@@ -1,6 +1,6 @@
 <?php
 
-namespace VirtualStore\Http;
+namespace App\Http;
 
 class Request
 {

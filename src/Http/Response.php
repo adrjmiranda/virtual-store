@@ -1,6 +1,6 @@
 <?php
 
-namespace VirtualStore\Http;
+namespace App\Http;
 
 class Response
 {
@@ -66,6 +66,11 @@ class Response
       $status,
       ['Location' => $target]
     );
+  }
+
+  public function setBody(mixed $body)
+  {
+    $this->body = $body;
   }
 
   public function send(): void
