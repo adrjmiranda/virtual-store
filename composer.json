@@ -1,0 +1,19 @@
+{
+	"name": "adriano/virtual-store",
+	"description": "Virtual Store",
+	"type": "project",
+	"license": "MIT",
+	"autoload": {
+		"psr-4": {
+			"VirtualStore\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Adriano Miranda",
+			"email": "adrjmiranda@gmail.com"
+		}
+	],
+	"minimum-stability": "stable",
+	"require": {}
+}
