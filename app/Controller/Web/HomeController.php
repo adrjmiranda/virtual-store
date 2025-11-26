@@ -9,7 +9,7 @@ class HomeController extends Controller
   public function index(Response $response): Response
   {
     $view = $this->engine->render('pages/home', [
-      'title' => 'Virtual  Store'
+      'title' => 'Virtual Store'
     ]);
     $response->setBody($view);
     return $response;

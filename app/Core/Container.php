@@ -69,13 +69,34 @@ class Container
     foreach ($params as $param) {
       $type = $param->getType();
 
-      if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-        $dependences[] = $this->make($type->getName());
-      } elseif ($param->isDefaultValueAvailable()) {
-        $dependences[] = $param->getDefaultValue();
-      } else {
-        throw new Exception("Could not resolve {$param->getName()} in {$reflection->getName()}", 500);
+      if (!$type) {
+        if ($param->isDefaultValueAvailable()) {
+          $dependences[] = $param->getDefaultValue();
+          continue;
+        }
+
+        throw new Exception("Cannot resolve parameter \${$param->getName()} in {$reflection->getName()}", 500);
       }
+
+      if (
+        $type instanceof ReflectionNamedType
+      ) {
+        $typeName = $type->getName();
+
+        if ($type->isBuiltin() || interface_exists($typeName) && new ReflectionClass($typeName)->isInternal()) {
+          if ($param->isDefaultValueAvailable()) {
+            $dependences[] = $param->getDefaultValue();
+            continue;
+          }
+
+          throw new Exception("Cannot auto-wire internal type {$typeName} for parameter \${$param->getName()}", 500);
+        }
+
+        $dependences[] = $this->make($typeName);
+        continue;
+      }
+
+      throw new Exception("Unable to resolve parameter \${$param->getName()} in {$reflection->getName()}", 500);
     }
 
     return $reflection->newInstanceArgs($dependences);

@@ -6,6 +6,7 @@ use App\Core\Container;
 use App\Http\Contracts\MiddlewareInterface;
 use App\Http\Message\Request;
 use App\Http\Message\Response;
+use App\Http\Message\Error;
 use Exception;
 
 class Router
@@ -187,38 +188,45 @@ class Router
     }
   }
 
-  public function run()
+  public function run(): Response
   {
-    $uri = $this->sanitizePath($this->request->uri());
-    $httpMethod = $this->request->method();
+    try {
+      $uri = $this->sanitizePath($this->request->uri());
+      $httpMethod = $this->request->method();
 
-    if (!$this->methodAllowed($httpMethod)) {
-      throw new Exception("Method {$httpMethod} not enabled", 400);
-    }
-
-    $httpMethodRoutes = array_keys($this->paths[$httpMethod]);
-    foreach ($httpMethodRoutes as $path) {
-      if (preg_match($path, $uri)) {
-        $matchPath = $this->paths[$httpMethod][$path];
-
-        $controller = $matchPath['controller'];
-        $handler = $matchPath['handler'];
-        $parameters = $matchPath['parameters'];
-        $middlewares = $matchPath['middlewares'];
-
-        $response = (new Queue(
-          $this->container,
-          $middlewares
-        ))->dispatch(
-            $this->request,
-            $this->response,
-            fn(): Response => $this->container->make($controller)->$handler($this->response, $this->request, $parameters)
-          );
-
-        return $response->send();
+      if (!$this->methodAllowed($httpMethod)) {
+        throw new Exception("Method {$httpMethod} not enabled", 405);
       }
-    }
 
-    throw new Exception("Route not found", 404);
+      $httpMethodRoutes = array_keys($this->paths[$httpMethod]);
+      foreach ($httpMethodRoutes as $path) {
+        if (preg_match($path, $uri)) {
+          $matchPath = $this->paths[$httpMethod][$path];
+
+          $controller = $matchPath['controller'];
+          $handler = $matchPath['handler'];
+          $parameters = $matchPath['parameters'];
+          $middlewares = $matchPath['middlewares'];
+
+          $response = (new Queue(
+            $this->container,
+            $middlewares
+          ))->dispatch(
+              $this->request,
+              $this->response,
+              fn(): Response => $this->container->make($controller)->$handler($this->response, $this->request, $parameters)
+            );
+
+          return $response;
+        }
+      }
+
+      throw new Exception("Route not found", 404);
+    } catch (\Throwable $th) {
+      $handler = $this->container->make(Error::class);
+      $response = $handler->render($th);
+
+      return $response;
+    }
   }
 }
