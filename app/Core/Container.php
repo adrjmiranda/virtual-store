@@ -11,6 +11,7 @@ class Container
 {
   private array $bindings = [];
   private array $singletons = [];
+  private array $instances = [];
 
   public function bind(string $abstract, callable|string $concrete): void
   {
@@ -24,12 +25,13 @@ class Container
 
   public function make(string $class): mixed
   {
-    if (isset($this->singletons[$class])) {
-      if (is_object($this->singletons[$class])) {
-        return $this->singletons[$class];
-      }
+    if (isset($this->instances[$class])) {
+      return $this->instances[$class];
+    }
 
-      return $this->singletons[$class] = $this->resolve($this->singletons[$class]);
+    if (isset($this->singletons[$class])) {
+      $object = $this->resolve($this->singletons[$class]);
+      return $this->instances[$class] = $object;
     }
 
     if (isset($this->bindings[$class])) {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Controller\HomeController;
+use App\Controller\Web\HomeController;
 use App\Http\Handler\Router;
 
 /** @var Router $router */
