@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Core\Container;
 use App\Http\Message\Error;
 use App\Services\SessionService;
+use App\Utils\Cache;
 use App\Utils\Logger;
 
 class AppServiceProvider
@@ -14,6 +15,7 @@ class AppServiceProvider
     // Singleton
     $container->singleton(Logger::class, Logger::class);
     $container->singleton(Error::class, Error::class);
+    $container->singleton(Cache::class, fn() => new Cache('/cache'));
 
     // Bind
     $container->bind(SessionService::class, SessionService::class);

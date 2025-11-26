@@ -148,3 +148,7 @@ vite.config.ts.timestamp-*
 .vite/
 
 .env
+
+**/cache
+**/logs
+**/log
