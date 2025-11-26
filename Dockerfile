@@ -16,9 +16,9 @@ RUN a2enmod rewrite
 
 # Define DocumentRoot correto (exemplo usando "public")
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-RUN mkdir -p /var/store/logs \
-    && chown -R www-data:www-data /var/store/logs \
-    && chmod -R 775 /var/store/logs
+RUN mkdir -p /var/log/app \
+    && chown -R www-data:www-data /var/log/app \
+    && chmod -R 775 /var/log/app
 
 
 # Copia composer

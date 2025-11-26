@@ -18,7 +18,7 @@ class Logger
 
   public function filename(string $name): self
   {
-    $this->logFile = "/var/store/logs/{$name}";
+    $this->logFile = "/var/log/app/{$name}";
 
     $dir = dirname($this->logFile);
 

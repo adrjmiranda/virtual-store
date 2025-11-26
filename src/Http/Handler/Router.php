@@ -2,6 +2,7 @@
 
 namespace App\Http\Handler;
 
+use App\Core\Container;
 use App\Http\Contracts\MiddlewareInterface;
 use App\Http\Message\Request;
 use App\Http\Message\Response;
@@ -9,6 +10,8 @@ use Exception;
 
 class Router
 {
+  private Container $container;
+
   private Request $request;
   private Response $response;
 
@@ -22,8 +25,11 @@ class Router
 
   private static array $globalMiddlewares = [];
 
-  public function __construct(array $enableMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'])
-  {
+  public function __construct(
+    Container $container,
+    array $enableMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS']
+  ) {
+    $this->container = $container;
     $this->enableMethods = $enableMethods;
     $this->request = new Request();
     $this->response = new Response();
@@ -201,11 +207,12 @@ class Router
         $middlewares = $matchPath['middlewares'];
 
         $response = (new Queue(
+          $this->container,
           $middlewares
         ))->dispatch(
             $this->request,
             $this->response,
-            fn(): Response => (new $controller())->$handler($this->response, $this->request, $parameters)
+            fn(): Response => $this->container->make($controller)->$handler($this->response, $this->request, $parameters)
           );
 
         return $response->send();

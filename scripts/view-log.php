@@ -1,7 +1,7 @@
 <?php
 
 $log = $argv[1] ?? 'app.log';
-$path = "/var/store/logs/{$log}";
+$path = "/var/log/app/{$log}";
 
 echo "Reading log: {$path}\n\n";
 

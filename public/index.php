@@ -3,11 +3,14 @@
 require_once __DIR__ . '/../bootstrap.php';
 
 use App\Controller\HomeController;
+use App\Core\Container;
 use App\Http\Handler\Router;
 use App\Utils\Logger;
 
 try {
-  $router = new Router();
+  $container = new Container();
+
+  $router = new Router($container);
   $router->setGlobalMiddlewares([
     'maintenance',
     'locale'

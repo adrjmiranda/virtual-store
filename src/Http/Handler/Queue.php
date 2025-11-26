@@ -2,15 +2,18 @@
 
 namespace App\Http\Handler;
 
+use App\Core\Container;
 use App\Http\Message\Request;
 use App\Http\Message\Response;
 
 class Queue
 {
+  private Container $container;
   private array $middlewares;
 
-  public function __construct(array $middlewares)
+  public function __construct(Container $container, array $middlewares)
   {
+    $this->container = $container;
     $this->middlewares = $middlewares;
   }
 
@@ -20,7 +23,7 @@ class Queue
 
     foreach (array_reverse($this->middlewares) as $middleware) {
       $current = $next;
-      $next = fn($request): Response => (new $middleware())->handler($request, $response, $current);
+      $next = fn($request): Response => $this->container->make($middleware)->handler($request, $response, $current);
     }
 
     return $next($request);
