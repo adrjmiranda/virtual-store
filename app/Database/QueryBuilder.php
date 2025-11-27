@@ -17,8 +17,7 @@ class QueryBuilder
 {
   private string $table;
   private string $select = '';
-  private array $orWhere = [];
-  private array $where = [];
+
 
   private ?int $limit = null;
   private ?string $orderBy = null;

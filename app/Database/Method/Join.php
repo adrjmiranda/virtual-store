@@ -13,7 +13,22 @@ trait Join
     $type = strtoupper($type);
     $type = $type === 'OR' ? $type : 'AND';
 
-    return empty($on) ? '' : implode(" {$type} ", array_map(fn($condition) => implode(' ', $condition), $on));
+    return empty($on) ? '' : implode(" {$type} ", array_map(function ($condition) {
+      [$field, $operator, $value] = $condition;
+      if (!$field) {
+        throw new \InvalidArgumentException("The field passed to the condition in `on` cannot be empty.", 500);
+      }
+
+      if (!$operator) {
+        throw new \InvalidArgumentException("The operator passed to the condition in `on` cannot be empty.", 500);
+      }
+
+      if (!$value) {
+        throw new \InvalidArgumentException("The value passed to the condition in `on` cannot be empty.", 500);
+      }
+
+      implode(' ', $condition);
+    }, $on));
   }
 
 
