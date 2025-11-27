@@ -14,15 +14,12 @@ trait Filter
   private array $orWhereNull = [];
   private array $andWhereNotNull = [];
   private array $orWhereNotNull = [];
-  private array $andHaving = [];
-  private array $orHaving = [];
 
   public function andWhere(string $column, string $operator, mixed $value): static
   {
     if (empty($column)) {
       throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
-
 
     if (empty($operator)) {
       throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
@@ -137,46 +134,33 @@ trait Filter
     return $this;
   }
 
-  public function andHaving(string $method, string $column, string $operator, mixed $value): static
+  private function getWhere(): ?string
   {
-    if (empty($method)) {
-      throw new \InvalidArgumentException("You cannot pass an empty method name.", 500);
+    $andWheres = implode(' AND ', array_map(fn($whereItem) => implode(' AND ', $whereItem), [
+      $this->andWhere,
+      $this->andWhereIn,
+      $this->andWhereNotIn,
+      $this->andWhereNull,
+      $this->andWhereNotNull,
+    ]));
+
+    $orWheres = implode(' OR ', array_map(fn($whereItem) => implode(' OR ', $whereItem), [
+      $this->orWhere,
+      $this->orWhereIn,
+      $this->orWhereNotIn,
+      $this->orWhereNull,
+      $this->orWhereNotNull,
+    ]));
+
+    $allWhere = [];
+    if (!empty($andWheres)) {
+      $allWhere[] = $andWheres;
     }
 
-    if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+    if (!empty($orWheres)) {
+      $allWhere[] = $orWheres;
     }
 
-
-    if (empty($operator)) {
-      throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
-    }
-
-
-    $method = strtoupper($method);
-    $this->andHaving[] = "{$method}($column) {$operator} {$value}";
-
-    return $this;
-  }
-
-  public function orHaving(string $method, string $column, string $operator, mixed $value): static
-  {
-    if (empty($method)) {
-      throw new \InvalidArgumentException("You cannot pass an empty method name.", 500);
-    }
-
-    if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
-    }
-
-    if (empty($operator)) {
-      throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
-    }
-
-
-    $method = strtoupper($method);
-    $this->orHaving[] = "{$method}($column) {$operator} {$value}";
-
-    return $this;
+    return empty($allWhere) ? null : 'WHERE ' . implode(' OR ', $allWhere);
   }
 }

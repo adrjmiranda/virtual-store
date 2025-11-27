@@ -17,11 +17,7 @@ class QueryBuilder
 {
   private string $table;
   private string $select = '';
-
-
   private ?int $limit = null;
-  private ?string $orderBy = null;
-  private ?string $groupBy = null;
 
   use Aggregation, Delete, Filter, Insert, Join, Limit, Pagination, Result, Select, Update;
 }
