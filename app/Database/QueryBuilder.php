@@ -15,8 +15,5 @@ use App\Database\Method\Update;
 
 class QueryBuilder
 {
-
-  private ?int $limit = null;
-
   use Aggregation, Delete, Filter, Insert, Join, Limit, Pagination, Result, Select, Update;
 }

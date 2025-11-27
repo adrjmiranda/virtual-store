@@ -20,6 +20,8 @@ abstract class Controller
 
   protected function view(string $template, array $data = [], bool $cache = false, ?int $ttl = null): string
   {
+    $template = str_replace('.', '/', $template);
+
     $key = $template . ':' . md5(serialize($data));
     if ($cache && $this->cache->has($key)) {
       return $this->cache->get($key);

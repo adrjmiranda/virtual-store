@@ -3,6 +3,7 @@
 namespace App\Database\Method;
 
 use App\Database\Type\JoinType;
+use InvalidArgumentException;
 
 trait Join
 {
@@ -16,15 +17,15 @@ trait Join
     return empty($on) ? '' : implode(" {$type} ", array_map(function ($condition) {
       [$field, $operator, $value] = $condition;
       if (!$field) {
-        throw new \InvalidArgumentException("The field passed to the condition in `on` cannot be empty.", 500);
+        throw new InvalidArgumentException("The field passed to the condition in `on` cannot be empty.", 500);
       }
 
       if (!$operator) {
-        throw new \InvalidArgumentException("The operator passed to the condition in `on` cannot be empty.", 500);
+        throw new InvalidArgumentException("The operator passed to the condition in `on` cannot be empty.", 500);
       }
 
       if ($value === '' || $value === null) {
-        throw new \InvalidArgumentException("The value passed to the condition in `on` cannot be empty.", 500);
+        throw new InvalidArgumentException("The value passed to the condition in `on` cannot be empty.", 500);
       }
 
       return implode(' ', $condition);
@@ -35,7 +36,7 @@ trait Join
   private function join(string $table, array $andOn, array $orOn, JoinType $type = JoinType::INNER): static
   {
     if (empty($table)) {
-      throw new \InvalidArgumentException("The argument table must not be empty.", 500);
+      throw new InvalidArgumentException("The argument table must not be empty.", 500);
     }
 
     $partAndOn = $this->partOn($andOn);
@@ -45,7 +46,7 @@ trait Join
     $partOn = !empty($partAndOn) ? "{$partAndOn} {$partOrOn}" : $partOrOn;
 
     if (!\in_array($type, [JoinType::CROSS]) && empty(trim($partOn))) {
-      throw new \InvalidArgumentException("A JOIN of type {$type->value} requires at least one ON condition.", 500);
+      throw new InvalidArgumentException("A JOIN of type {$type->value} requires at least one ON condition.", 500);
     }
 
     $queryStart = "{$type->value} JOIN {$table}";

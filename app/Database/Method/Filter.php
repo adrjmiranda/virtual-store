@@ -2,6 +2,8 @@
 
 namespace App\Database\Method;
 
+use InvalidArgumentException;
+
 trait Filter
 {
   private array $andWhere = [];
@@ -18,11 +20,11 @@ trait Filter
   public function andWhere(string $column, string $operator, mixed $value): static
   {
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     if (empty($operator)) {
-      throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty operator.", 500);
     }
 
     $this->andWhere[] = "{$column} {$operator} {$value}";
@@ -33,12 +35,12 @@ trait Filter
   public function orWhere(string $column, string $operator, mixed $value): static
   {
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
 
     if (empty($operator)) {
-      throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty operator.", 500);
     }
 
     $this->orWhere[] = "{$column} {$operator} {$value}";
@@ -57,7 +59,7 @@ trait Filter
   public function orWhereIn(string $column, array $values): static
   {
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $list = implode(', ', $values);
@@ -69,7 +71,7 @@ trait Filter
   public function andWhereNotIn(string $column, array $values): static
   {
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $list = implode(', ', $values);
@@ -81,7 +83,7 @@ trait Filter
   public function orWhereNotIn(string $column, array $values): static
   {
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $list = implode(', ', $values);
@@ -93,7 +95,7 @@ trait Filter
   public function andWhereNull(string|array $columns): static
   {
     if (empty($columns)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $this->andWhereNull[] = \is_array($columns) ? implode(' AND ', array_map(fn($column) => "$column IS NULL", $columns)) : "{$columns} IS NULL";
@@ -104,7 +106,7 @@ trait Filter
   public function orWhereNull(string|array $columns): static
   {
     if (empty($columns)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $this->orWhereNull[] = \is_array($columns) ? implode(' OR ', array_map(fn($column) => "$column IS NULL", $columns)) : "{$columns} IS NULL";
@@ -115,7 +117,7 @@ trait Filter
   public function andWhereNotNull(string|array $columns): static
   {
     if (empty($columns)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $this->andWhereNotNull[] = \is_array($columns) ? implode(' OR ', array_map(fn($column) => "$column IS NOT NULL", $columns)) : "{$columns} IS NOT NULL";
@@ -126,7 +128,7 @@ trait Filter
   public function orWhereNotNull(string|array $columns): static
   {
     if (empty($columns)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $this->orWhereNotNull[] = \is_array($columns) ? implode(' OR ', array_map(fn($column) => "$column IS NOT NULL", $columns)) : "{$columns} IS NOT NULL";

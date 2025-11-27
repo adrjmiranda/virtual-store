@@ -2,6 +2,8 @@
 
 namespace App\Database\Method;
 
+use InvalidArgumentException;
+
 trait Aggregation
 {
   private array $orderBy = [];
@@ -13,11 +15,11 @@ trait Aggregation
   public function orderBy(string $column, string $direction = 'ASC'): static
   {
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     if ($direction !== 'ASC' && $direction !== 'DESC') {
-      throw new \InvalidArgumentException("Passed invalid direction in orderBy function.", 500);
+      throw new InvalidArgumentException("Passed invalid direction in orderBy function.", 500);
     }
 
     $this->orderBy[] = "{$column} {$direction}";
@@ -33,7 +35,7 @@ trait Aggregation
   public function groupBy(string|array $columns): static
   {
     if (empty($columns)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     $this->groupBy = \is_array($columns) ? [...$this->groupBy, ...$columns] : [...$this->groupBy, $columns];
@@ -50,16 +52,16 @@ trait Aggregation
   public function andHaving(string $method, string $column, string $operator, mixed $value): static
   {
     if (empty($method)) {
-      throw new \InvalidArgumentException("You cannot pass an empty method name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty method name.", 500);
     }
 
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
 
     if (empty($operator)) {
-      throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty operator.", 500);
     }
 
 
@@ -72,15 +74,15 @@ trait Aggregation
   public function orHaving(string $method, string $column, string $operator, mixed $value): static
   {
     if (empty($method)) {
-      throw new \InvalidArgumentException("You cannot pass an empty method name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty method name.", 500);
     }
 
     if (empty($column)) {
-      throw new \InvalidArgumentException("You cannot pass an empty column name.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty column name.", 500);
     }
 
     if (empty($operator)) {
-      throw new \InvalidArgumentException("You cannot pass an empty operator.", 500);
+      throw new InvalidArgumentException("You cannot pass an empty operator.", 500);
     }
 
 

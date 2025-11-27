@@ -2,6 +2,8 @@
 
 namespace App\Database\Method;
 
+use LogicException;
+
 trait Select
 {
   private ?string $table = null;
@@ -40,7 +42,7 @@ trait Select
   private function getSelect(): ?string
   {
     if (!$this->table) {
-      throw new \LogicException("No table defined. Use ->from('table') before building the query.", 500);
+      throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
     }
 
     $distinct = $this->distinct ? 'DISTINCT ' : '';
