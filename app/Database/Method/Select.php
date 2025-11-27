@@ -2,7 +2,7 @@
 
 namespace App\Database\Method;
 
-use LogicException;
+use InvalidArgumentException;
 
 trait Select
 {
@@ -13,7 +13,7 @@ trait Select
   public function select(string|array $columns = ['*']): static
   {
     if (empty($columns)) {
-      throw new \InvalidArgumentException("Column list cannot be empty.", 500);
+      throw new InvalidArgumentException("Column list cannot be empty.", 500);
     }
 
     $this->columns = \is_array($columns) ? $columns : [$columns];
@@ -24,7 +24,7 @@ trait Select
   public function from(string $table): static
   {
     if (empty($table)) {
-      throw new \InvalidArgumentException("The table name must be provided.", 500);
+      throw new InvalidArgumentException("The table name must be provided.", 500);
     }
 
     $this->table = $table;
@@ -41,10 +41,6 @@ trait Select
 
   private function getSelect(): ?string
   {
-    if (!$this->table) {
-      throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
-    }
-
     $distinct = $this->distinct ? 'DISTINCT ' : '';
     $columns = implode(', ', $this->columns);
 

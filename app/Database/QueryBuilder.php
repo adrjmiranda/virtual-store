@@ -12,8 +12,19 @@ use App\Database\Method\Pagination;
 use App\Database\Method\Result;
 use App\Database\Method\Select;
 use App\Database\Method\Update;
+use LogicException;
 
 class QueryBuilder
 {
   use Aggregation, Delete, Filter, Insert, Join, Limit, Pagination, Result, Select, Update;
+
+  public function query()
+  {
+    if (!$this->table) {
+      throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
+    }
+
+    // TODO:
+    // ...
+  }
 }

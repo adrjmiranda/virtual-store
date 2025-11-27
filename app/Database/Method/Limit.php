@@ -22,7 +22,7 @@ trait Limit
 
   private function getLimit(): ?string
   {
-    return $this->limit === null ? null : $this->limit;
+    return $this->limit === null ? null : "LIMIT {$this->limit}";
   }
 
   public function offset(int $offset): static
@@ -38,6 +38,6 @@ trait Limit
 
   private function getOffset(): ?string
   {
-    return $this->offset === null ? null : $this->offset;
+    return $this->offset === null ? null : "OFFSET {$this->offset}";
   }
 }
