@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS images (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  path VARCHAR(255) NOT NULL,
+  imageable_id INTEGER NOT NULL,
+  imageable_type VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_images_updated_at
+BEFORE UPDATE ON images
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS coupons CASCADE;
+
+DROP TYPE IF EXISTS coupon_type;

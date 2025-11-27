@@ -1,4 +1,5 @@
 {
+	"version": "1.0.0",
 	"name": "adriano/virtual-store",
 	"description": "Virtual Store",
 	"type": "project",
@@ -16,7 +17,8 @@
 		]
 	},
 	"scripts": {
-		"view:log": "php scripts/view-log.php"
+		"view:log": "php scripts/view_log.php",
+		"database": "php scripts/database.php"
 	},
 	"authors": [
 		{

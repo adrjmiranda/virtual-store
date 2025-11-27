@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS product_variants (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  sku VARCHAR(255) NOT NULL UNIQUE,
+  price INTEGER NOT NULL CHECK (price >= 0),
+  stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_product_variants_updated_at
+BEFORE UPDATE ON product_variants
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

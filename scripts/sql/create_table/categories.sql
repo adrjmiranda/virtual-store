@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS categories (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) NOT NULL UNIQUE,
+  description TEXT NULL,
+  parent_id BIGINT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_categories_updated_at
+BEFORE UPDATE ON categories
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

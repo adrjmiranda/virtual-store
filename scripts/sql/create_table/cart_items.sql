@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS cart_items (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  cart_id BIGINT NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
+  product_id BIGINT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  variant_id BIGINT NULL REFERENCES product_variants(id) ON DELETE SET NULL,
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  price INTEGER NOT NULL CHECK (price >= 0),
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_cart_items_updated_at
+BEFORE UPDATE ON cart_items
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

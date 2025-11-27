@@ -1,0 +1,26 @@
+CREATE TABLE IF NOT EXISTS addresses (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  street VARCHAR(255) NOT NULL,
+  number VARCHAR(50) NULL,
+  complement VARCHAR(255) NULL,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(100) NOT NULL,
+  country VARCHAR(100) NOT NULL,
+  postal_code VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_addresses_updated_at
+BEFORE UPDATE ON addresses
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();

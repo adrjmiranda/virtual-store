@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS event_logs CASCADE;
+
+DROP TYPE IF EXISTS event_type;
