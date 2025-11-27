@@ -23,17 +23,21 @@ trait Join
         throw new \InvalidArgumentException("The operator passed to the condition in `on` cannot be empty.", 500);
       }
 
-      if (!$value) {
+      if ($value === '' || $value === null) {
         throw new \InvalidArgumentException("The value passed to the condition in `on` cannot be empty.", 500);
       }
 
-      implode(' ', $condition);
+      return implode(' ', $condition);
     }, $on));
   }
 
 
   private function join(string $table, array $andOn, array $orOn, JoinType $type = JoinType::INNER): static
   {
+    if (empty($table)) {
+      throw new \InvalidArgumentException("The argument table must not be empty.", 500);
+    }
+
     $partAndOn = $this->partOn($andOn);
     $partOrOn = $this->partOn($orOn);
     $partOrOn = !empty($partAndOn) ? "OR {$partOrOn}" : $partOrOn;
@@ -45,7 +49,7 @@ trait Join
     }
 
     $queryStart = "{$type->value} JOIN {$table}";
-    $queryPartWithOn = "{$queryStart} {$partOn}";
+    $queryPartWithOn = "{$queryStart} ON {$partOn}";
 
     $queryPart = $type->value === JoinType::CROSS ? $queryStart : $queryPartWithOn;
     $this->join[] = $queryPart;
@@ -91,5 +95,10 @@ trait Join
   public function getJoinPart(): string
   {
     return implode(' ', $this->join);
+  }
+
+  private function getJoin(): ?string
+  {
+    return empty($this->join) ? null : implode(' ', $this->join);
   }
 }

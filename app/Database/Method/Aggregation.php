@@ -25,7 +25,7 @@ trait Aggregation
     return $this;
   }
 
-  private function getOrderBy(): ?string
+  private function getOrder(): ?string
   {
     return empty($this->orderBy) ? null : 'ORDER BY ' . implode(', ', $this->orderBy);
   }
@@ -41,7 +41,7 @@ trait Aggregation
     return $this;
   }
 
-  private function getGroupBy(): ?string
+  private function getGroup(): ?string
   {
     return empty($this->groupBy) ? null : 'GROUP BY ' . implode(', ', $this->groupBy);
   }
