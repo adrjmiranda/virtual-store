@@ -3,6 +3,7 @@
 namespace App\Database\Method;
 
 use InvalidArgumentException;
+use LogicException;
 
 trait Select
 {
@@ -41,6 +42,10 @@ trait Select
 
   private function getSelect(): ?string
   {
+    if (!$this->table) {
+      throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
+    }
+
     $distinct = $this->distinct ? 'DISTINCT ' : '';
     $columns = implode(', ', $this->columns);
 
