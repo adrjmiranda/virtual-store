@@ -165,4 +165,18 @@ trait Filter
 
     return empty($allWhere) ? null : 'WHERE ' . implode(' OR ', $allWhere);
   }
+
+  private function clearWhere(): void
+  {
+    $this->andWhere = [];
+    $this->orWhere = [];
+    $this->andWhereIn = [];
+    $this->orWhereIn = [];
+    $this->andWhereNotIn = [];
+    $this->orWhereNotIn = [];
+    $this->andWhereNull = [];
+    $this->orWhereNull = [];
+    $this->andWhereNotNull = [];
+    $this->orWhereNotNull = [];
+  }
 }

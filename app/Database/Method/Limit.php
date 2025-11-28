@@ -40,4 +40,14 @@ trait Limit
   {
     return $this->offset === null ? null : "OFFSET {$this->offset}";
   }
+
+  private function clearLimit(): void
+  {
+    $this->limit = null;
+  }
+
+  private function clearOffset(): void
+  {
+    $this->offset = null;
+  }
 }

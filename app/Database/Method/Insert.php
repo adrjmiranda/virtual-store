@@ -13,6 +13,12 @@ trait Insert
 
   public function insert(array $data): static
   {
+    if ($this->mainCommandAreadyFilled) {
+      throw new LogicException("You cannot call more than one main method per query.", 500);
+    }
+
+    $this->mainCommandAreadyFilled = true;
+
     if (empty($data)) {
       throw new InvalidArgumentException("The data submitted for update must not be empty.", 500);
     }
@@ -32,5 +38,12 @@ trait Insert
     }
 
     return $this->insertColumns === null || $this->insertValues === null ? null : "INSERT INTO {$this->table} {$this->insertColumns} VALUES {$this->insertValues} RETURNING id";
+  }
+
+  private function clearInsert(): void
+  {
+    $this->dataToInsert = [];
+    $this->insertColumns = null;
+    $this->insertValues = null;
   }
 }

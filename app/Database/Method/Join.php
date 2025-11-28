@@ -102,4 +102,9 @@ trait Join
   {
     return empty($this->join) ? null : implode(' ', $this->join);
   }
+
+  private function clearJoin(): void
+  {
+    $this->join = [];
+  }
 }

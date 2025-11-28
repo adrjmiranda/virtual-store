@@ -114,4 +114,20 @@ trait Aggregation
 
     return empty($partHaving) ? null : "HAVING $partHaving";
   }
+
+  private function clearOder(): void
+  {
+    $this->orderBy = [];
+  }
+
+  private function clearGroup(): void
+  {
+    $this->groupBy = [];
+  }
+
+  private function clearHaving(): void
+  {
+    $this->andHaving = [];
+    $this->orHaving = [];
+  }
 }

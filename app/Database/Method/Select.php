@@ -8,16 +8,22 @@ use LogicException;
 trait Select
 {
   private ?string $table = null;
-  private array $columns = [];
+  private array $selectColumns = [];
   private bool $distinct = false;
 
   public function select(string|array $columns = ['*']): static
   {
+    if ($this->mainCommandAreadyFilled) {
+      throw new LogicException("You cannot call more than one main method per query.", 500);
+    }
+
+    $this->mainCommandAreadyFilled = true;
+
     if (empty($columns)) {
       throw new InvalidArgumentException("Column list cannot be empty.", 500);
     }
 
-    $this->columns = \is_array($columns) ? $columns : [$columns];
+    $this->selectColumns = \is_array($columns) ? $columns : [$columns];
 
     return $this;
   }
@@ -47,8 +53,15 @@ trait Select
     }
 
     $distinct = $this->distinct ? 'DISTINCT ' : '';
-    $columns = implode(', ', $this->columns);
+    $columns = implode(', ', $this->selectColumns);
 
     return empty($columns) ? null : "SELECT {$distinct}{$columns} FROM {$this->table}";
+  }
+
+  private function clearSelect(): void
+  {
+    $this->table = null;
+    $this->selectColumns = [];
+    $this->distinct = false;
   }
 }

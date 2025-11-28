@@ -10,6 +10,12 @@ trait Delete
 
   public function delete(): static
   {
+    if ($this->mainCommandAreadyFilled) {
+      throw new LogicException("You cannot call more than one main method per query.", 500);
+    }
+
+    $this->mainCommandAreadyFilled = true;
+
     if (!$this->table) {
       throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
     }
@@ -22,5 +28,10 @@ trait Delete
   private function getDelete(): ?string
   {
     return $this->delete ?? null;
+  }
+
+  private function clearDelete(): void
+  {
+    $this->delete = null;
   }
 }
