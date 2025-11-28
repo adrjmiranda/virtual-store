@@ -13,7 +13,8 @@
 			"helpers/path.php",
 			"helpers/file.php",
 			"helpers/config.php",
-			"helpers/env.php"
+			"helpers/env.php",
+			"helpers/string.php"
 		]
 	},
 	"scripts": {
