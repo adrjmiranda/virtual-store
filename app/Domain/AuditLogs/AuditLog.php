@@ -16,7 +16,7 @@ class AuditLog extends DatabaseEntity
     private ?UserId $userId,
     private Action $action,
     private TableName $tableName,
-    private RecordId $recordId,
+    private ?RecordId $recordId,
     private ?Changes $changes,
     private ?IpAddress $ipAddress,
     private ?CreatedAt $createdAt,
