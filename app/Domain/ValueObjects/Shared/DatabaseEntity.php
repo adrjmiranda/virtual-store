@@ -32,12 +32,32 @@ abstract class DatabaseEntity
       }
 
       if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
-        $typeName = $type->getName();
 
-        $entity->$propertyName = $value !== null
-          ? new $typeName($value)
-          : null;
+        $voClass = $type->getName();
 
+        if ($value === null) {
+          $entity->$propertyName = null;
+          continue;
+        }
+
+        $voReflection = new ReflectionClass($voClass);
+        $constructor = $voReflection->getConstructor();
+        $params = $constructor?->getParameters();
+
+        if ($params && count($params) === 1) {
+          $paramType = $params[0]->getType();
+
+          if (
+            $paramType instanceof ReflectionNamedType &&
+            enum_exists($paramType->getName())
+          ) {
+            $enumClass = $paramType->getName();
+            $entity->$propertyName = new $voClass($enumClass::from($value));
+            continue;
+          }
+        }
+
+        $entity->$propertyName = new $voClass($value);
         continue;
       }
 
@@ -47,6 +67,8 @@ abstract class DatabaseEntity
     return $entity;
   }
 
+
+
   public static function fromDatabase(array $data): static
   {
     $reflection = new ReflectionClass(static::class);
@@ -54,11 +76,15 @@ abstract class DatabaseEntity
     $params = $constructor->getParameters();
 
     $dependences = [];
+
     foreach ($params as $param) {
       $type = $param->getType();
 
       if ($type instanceof ReflectionUnionType) {
-        $namedTypes = array_filter($type->getTypes(), fn($t) => !$t->isBuiltin());
+        $namedTypes = array_filter(
+          $type->getTypes(),
+          fn($t) => !$t->isBuiltin()
+        );
         $type = reset($namedTypes);
       }
 
@@ -73,16 +99,42 @@ abstract class DatabaseEntity
       $filedClassName = basename(str_replace('\\', '/', $typeName));
       $field = camelToSnake($filedClassName);
 
-      if (!\array_key_exists($field, $data) || $data[$field] === null) {
+      if (!\array_key_exists($field, $data)) {
         $dependences[] = null;
         continue;
       }
 
-      $dependences[] = new $typeName($data[$field]);
+      $value = $data[$field];
+
+      if ($value === null) {
+        $dependences[] = null;
+        continue;
+      }
+
+      $voReflection = new ReflectionClass($typeName);
+      $voConstructor = $voReflection->getConstructor();
+
+      if ($voConstructor && $voConstructor->getNumberOfParameters() === 1) {
+        $innerParam = $voConstructor->getParameters()[0];
+        $innerType = $innerParam->getType();
+
+        if ($innerType instanceof ReflectionNamedType) {
+          $innerTypeName = $innerType->getName();
+
+          if (enum_exists($innerTypeName)) {
+            $enumValue = $innerTypeName::from($value);
+            $dependences[] = new $typeName($enumValue);
+            continue;
+          }
+        }
+      }
+
+      $dependences[] = new $typeName($value);
     }
 
     return $reflection->newInstanceArgs($dependences);
   }
+
 
   public function toDatabase(array $fields): array
   {
@@ -103,7 +155,8 @@ abstract class DatabaseEntity
       }
 
       if (\is_object($valueObject) && method_exists($valueObject, 'value')) {
-        $data[$field] = $valueObject->value();
+        $val = $valueObject->value();
+        $data[$field] = $val instanceof \BackedEnum ? $val->value : $val;
         continue;
       }
 
