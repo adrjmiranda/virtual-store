@@ -2,12 +2,37 @@
 
 namespace App\Domain\ValueObjects\Shared;
 
+use Exception;
 use ReflectionClass;
 use ReflectionNamedType;
+use ReflectionProperty;
 use ReflectionUnionType;
 
 abstract class DatabaseEntity
 {
+  public function __call($method, $args)
+  {
+    $reflection = new ReflectionClass($this);
+
+    $props = array_map(fn($p) => $p->getName(), $reflection->getProperties(ReflectionProperty::IS_PRIVATE));
+
+    if (str_ends_with($method, 'Value')) {
+      $prop = substr($method, 0, -5);
+
+      if (!\in_array($prop, $props, true)) {
+        throw new Exception("Invalid method '{$method}' in " . static::class, 500);
+      }
+
+      return $this->$prop?->value();
+    }
+
+    if (\in_array($method, $props, true)) {
+      return $this->$method;
+    }
+
+    throw new Exception("Invalid method '{$method}' in " . static::class, 500);
+  }
+
   public static function partial(array $data): static
   {
     $class = new ReflectionClass(static::class);

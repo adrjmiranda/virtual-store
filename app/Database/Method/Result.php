@@ -8,58 +8,83 @@ use PDO;
 
 trait Result
 {
-  public function get(): int|array
+  public function execute(): bool
   {
-    $sql = $this->toSql();
-    $stmt = $this->pdo->prepare($sql);
-    $stmt->execute($this->params);
+    try {
+      $sql = $this->toSql();
+      $stmt = $this->pdo->prepare($sql);
+      $stmt->execute($this->params);
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+      return $stmt->rowCount() !== 0;
+    } catch (\Throwable $th) {
+      throw $th;
+    }
+  }
+
+  public function get(): array
+  {
+    try {
+      $sql = $this->toSql();
+      $stmt = $this->pdo->prepare($sql);
+      $stmt->execute($this->params);
+
+      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (\Throwable $th) {
+      throw $th;
+    }
   }
 
   public function first(): ?array
   {
-    $this->limit(1);
+    try {
+      $this->limit(1);
 
-    $sql = $this->toSql();
-    $stmt = $this->pdo->prepare($sql);
-    $stmt->execute($this->params);
+      $sql = $this->toSql();
+      $stmt = $this->pdo->prepare($sql);
+      $stmt->execute($this->params);
 
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return $result ?: null;
+      return $result ?: null;
+    } catch (\Throwable $th) {
+      throw $th;
+    }
   }
 
   private function operationResult(string $column, string $method): int
   {
-    if (!$this->table) {
-      throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
+    try {
+      if (!$this->table) {
+        throw new LogicException("No table defined. Use ->from('table') before building the query.", 500);
+      }
+
+      if (empty($method)) {
+        throw new InvalidArgumentException("The method cannot be empty.", 500);
+      }
+
+      $method = strtoupper($method);
+
+      if (empty($column)) {
+        throw new InvalidArgumentException("The column passed to the function {$method} must not be empty.", 500);
+      }
+
+
+      $sql = "SELECT {$method}($column) AS result FROM {$this->table}";
+
+      $partWhere = $this->getWhere();
+      if ($partWhere !== null) {
+        $sql .= " {$partWhere}";
+      }
+
+      $stmt = $this->pdo->prepare($sql);
+
+      return match ($method) {
+        'COUNT' => (int) $stmt->fetchColumn(),
+        'default' => (float) $stmt->fetchColumn(),
+      };
+    } catch (\Throwable $th) {
+      throw $th;
     }
-
-    if (empty($method)) {
-      throw new InvalidArgumentException("The method cannot be empty.", 500);
-    }
-
-    $method = strtoupper($method);
-
-    if (empty($column)) {
-      throw new InvalidArgumentException("The column passed to the function {$method} must not be empty.", 500);
-    }
-
-
-    $sql = "SELECT {$method}($column) AS result FROM {$this->table}";
-
-    $partWhere = $this->getWhere();
-    if ($partWhere !== null) {
-      $sql .= " {$partWhere}";
-    }
-
-    $stmt = $this->pdo->prepare($sql);
-
-    return match ($method) {
-      'COUNT' => (int) $stmt->fetchColumn(),
-      'default' => (float) $stmt->fetchColumn(),
-    };
   }
 
   public function count(): int
@@ -94,13 +119,17 @@ trait Result
 
   public function exists(): bool
   {
-    $this->limit(1);
+    try {
+      $this->limit(1);
 
-    $sql = $this->toSql();
+      $sql = $this->toSql();
 
-    $stmt = $this->pdo->prepare($sql);
-    $stmt->execute($this->params);
+      $stmt = $this->pdo->prepare($sql);
+      $stmt->execute($this->params);
 
-    return (bool) $stmt->fetchColumn();
+      return (bool) $stmt->fetchColumn();
+    } catch (\Throwable $th) {
+      throw $th;
+    }
   }
 }
