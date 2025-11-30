@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified_at TIMESTAMP NULL,
   password VARCHAR(255) NOT NULL,
   role user_role NOT NULL DEFAULT 'user',
-  deleted_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP NOT NULL DEFAULT now()
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMP NULL
 );
 
 CREATE OR REPLACE FUNCTION update_timestamp()
