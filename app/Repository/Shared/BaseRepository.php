@@ -14,7 +14,7 @@ abstract class BaseRepository
    */
   public function __construct(
     protected QueryBuilder $db,
-    private string $table,
+    protected string $table,
     private string $entityClass
   ) {
   }

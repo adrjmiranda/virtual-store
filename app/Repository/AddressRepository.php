@@ -18,7 +18,7 @@ class AddressRepository extends BaseRepository
   public function forUser(int $userId): array
   {
     $rows = $this->db
-      ->from(self::TABLE)
+      ->from($this->table)
       ->andWhere('user_id', '=', $userId)
       ->get();
 
