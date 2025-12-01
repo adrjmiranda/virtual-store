@@ -13,10 +13,15 @@ abstract class BaseRepository
    * @param class-string<TEntity> $entityClass
    */
   public function __construct(
-    protected QueryBuilder $db,
+    protected QueryBuilder $queryBuilder,
     protected string $table,
     private string $entityClass
   ) {
+  }
+
+  public function queryBuilder(): QueryBuilder
+  {
+    return $this->queryBuilder;
   }
 
   /**
@@ -25,7 +30,7 @@ abstract class BaseRepository
    */
   public function find(int $id): ?object
   {
-    $row = $this->db
+    $row = $this->queryBuilder
       ->from($this->table)
       ->andWhere('id', '=', $id)
       ->first();
@@ -40,7 +45,7 @@ abstract class BaseRepository
    */
   public function insert(object $entity, array $fields): ?int
   {
-    $result = $this->db
+    $result = $this->queryBuilder
       ->from($this->table)
       ->insert($entity->toDatabase($fields))
       ->get();
@@ -59,7 +64,7 @@ abstract class BaseRepository
     unset($data['id']);
     $id = $entity->idValue();
 
-    return $this->db
+    return $this->queryBuilder
       ->from($this->table)
       ->andWhere('id', '=', $id)
       ->update($data)
@@ -76,7 +81,7 @@ abstract class BaseRepository
       throw new \RuntimeException("Entity must have idValue() method.");
     }
 
-    return $this->db
+    return $this->queryBuilder
       ->from($this->table)
       ->andWhere('id', '=', $entity->idValue())
       ->delete()

@@ -27,6 +27,21 @@ class QueryBuilder
     $this->pdo = $pdo;
   }
 
+  public function startTransaction(): void
+  {
+    $this->pdo->beginTransaction();
+  }
+
+  public function finishTransaction(): void
+  {
+    $this->pdo->commit();
+  }
+
+  public function cancelTransaction(): void
+  {
+    $this->pdo->rollBack();
+  }
+
   private function toSql(): string
   {
     $insertQuery = $this->getInsert();

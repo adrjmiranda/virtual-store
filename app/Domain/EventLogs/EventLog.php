@@ -12,6 +12,13 @@ use App\Domain\ValueObjects\UserId;
 
 class EventLog extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'user_id',
+    'type',
+    'description',
+    'ip_address',
+  ];
+
   public function __construct(
     private ?Id $id,
     private ?UserId $userId,

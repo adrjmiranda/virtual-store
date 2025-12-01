@@ -10,6 +10,18 @@ use App\Domain\ValueObjects\UserId;
 
 class Address extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'user_id',
+    'street',
+    'number',
+    'complement',
+    'city',
+    'state',
+    'country',
+    'postal_code'
+  ];
+
+
   public function __construct(
     private ?Id $id,
     private UserId $userId,

@@ -10,7 +10,7 @@ class Validation
   use Methods;
 
   private const string RULE_METHOD_SEPARATOR = '|';
-  private const string RULE_METHOD_PARAM_SEPARATOR = '@';
+  private const string RULE_METHOD_PARAM_SEPARATOR = ':';
 
   private function ruleMethodList(string $ruleList): array
   {

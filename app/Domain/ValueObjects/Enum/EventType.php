@@ -2,7 +2,7 @@
 
 namespace App\Domain\ValueObjects\Enum;
 
-enum EvenType: string
+enum EventType: string
 {
   case LOGIN = 'login';
   case LOGOUT = 'logout';

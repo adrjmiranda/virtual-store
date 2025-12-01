@@ -30,6 +30,22 @@ class Request
     $this->json = json_decode($this->rawBody, true);
   }
 
+  public function clientIp(): ?string
+  {
+    $ip = null;
+
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+      $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ipList = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+      $ip = trim($ipList[0]);
+    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+      $ip = $_SERVER['REMOTE_ADDR'];
+    }
+
+    return $ip;
+  }
+
   public function method(): string
   {
     return $this->method;

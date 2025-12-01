@@ -7,11 +7,14 @@ use App\Exceptions\InvalidAlphabeticOnlyException;
 use App\Exceptions\InvalidAlphabeticWithAccentsException;
 use App\Exceptions\InvalidAlphabeticWithHifenException;
 use App\Exceptions\InvalidAlphabeticWithSpacesException;
+use App\Exceptions\InvalidAlphaNumericException;
 use App\Exceptions\InvalidIntegerException;
 use App\Exceptions\InvalidMaxLenException;
 use App\Exceptions\InvalidMinLenException;
 use App\Exceptions\InvalidNegativeIntegerException;
 use App\Exceptions\InvalidPositiveIntegerException;
+use App\Exceptions\InvalidRealException;
+use App\Exceptions\InvalidStringException;
 use App\Exceptions\RequiredFieldException;
 use App\Exceptions\InvalidEmailException;
 use App\Exceptions\InvalidNumericException;
@@ -33,20 +36,37 @@ trait Methods
     }
   }
 
-  private function numeric(string $field, float|int|string $value): void
+  private function numeric(string $field, string $value): void
   {
-
-    if (\is_string($value) && !preg_match('/^-?((0|[1-9][0-9]*)(\.[0-9]+)?|\.[0-9]+)$/', $value)) {
-      throw new InvalidNumericException($field);
+    if ($value === null || $value === '') {
+      return;
     }
 
-    if (!\is_int($value) && !\is_float($value)) {
+    if (!preg_match('/^[0-9]+$/', $value)) {
       throw new InvalidNumericException($field);
     }
   }
 
-  private function int(string $field, int|string $value): void
+  private function real(string $field, float|int|string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (\is_string($value) && !preg_match('/^-?((0|[1-9][0-9]*)(\.[0-9]+)?|\.[0-9]+)$/', $value)) {
+      throw new InvalidRealException($field);
+    }
+
+    if (!\is_int($value) && !\is_float($value)) {
+      throw new InvalidRealException($field);
+    }
+  }
+
+  private function integer(string $field, int|string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
 
     if (\is_string($value) && !preg_match('/^(0|(-?[1-9][0-9]*))$/', $value)) {
       throw new InvalidIntegerException($field);
@@ -59,6 +79,10 @@ trait Methods
 
   private function positive(string $field, int|string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (\is_string($value) && !preg_match('/^[1-9][0-9]*$/', $value)) {
       throw new InvalidPositiveIntegerException($field);
     }
@@ -70,6 +94,10 @@ trait Methods
 
   private function negative(string $field, int|string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (\is_string($value) && !preg_match('/^-[1-9][0-9]*$/', $value)) {
       throw new InvalidNegativeIntegerException($field);
     }
@@ -81,6 +109,10 @@ trait Methods
 
   private function alpha(string $field, string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (!preg_match('/^[A-Za-z]+$/', $value)) {
       throw new InvalidAlphabeticOnlyException($field);
     }
@@ -88,6 +120,10 @@ trait Methods
 
   private function alphaaccents(string $field, string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (!preg_match('/^[\p{L}]+$/u', $value)) {
       throw new InvalidAlphabeticWithAccentsException($field);
     }
@@ -95,6 +131,10 @@ trait Methods
 
   private function alphaspaces(string $field, string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (!preg_match('/^[\p{L}\s]+$/u', $value)) {
       throw new InvalidAlphabeticWithSpacesException($field);
     }
@@ -102,6 +142,10 @@ trait Methods
 
   private function alphahifen(string $field, string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (!preg_match('/^[\p{L}-]+$/u', $value)) {
       throw new InvalidAlphabeticWithHifenException($field);
     }
@@ -109,13 +153,32 @@ trait Methods
 
   private function alphabetic(string $field, string $value): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     if (!preg_match('/^[\p{L}\s-]+$/u', $value)) {
       throw new InvalidAlphabeticException($field);
     }
   }
 
+  private function alphanumeric(string $field, string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (!preg_match('/^[0-9A-Za-z]+$/', $value)) {
+      throw new InvalidAlphaNumericException($field);
+    }
+  }
+
   private function min(string $field, string $value, array $params): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     $minLen = $params[0] ?? null;
     if ($minLen === null) {
       throw new InvalidArgumentException("The min validation function requires a parameter.", 500);
@@ -133,6 +196,10 @@ trait Methods
 
   private function max(string $field, string $value, array $params): void
   {
+    if ($value === null || $value === '') {
+      return;
+    }
+
     $maxLen = $params[0] ?? null;
     if ($maxLen === null) {
       throw new InvalidArgumentException("The min validation function requires a parameter.", 500);
@@ -145,6 +212,28 @@ trait Methods
     $maxLen = (int) $maxLen;
     if (\strlen($value) > $maxLen) {
       throw new InvalidMaxLenException($field, "O campo deve ter no máximo {$maxLen} caracteres.");
+    }
+  }
+
+  private function string(string $field, string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (!preg_match('/^[\p{L}\p{N}\s\.\-\/ºª,\']+$/u', $value)) {
+      throw new InvalidStringException($field);
+    }
+  }
+
+  private function acronym(string $field, string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (!preg_match('/^[A-Z]{2,3}$/', $value)) {
+      throw new InvalidStringException($field, "O campo deve conter apenas letras maiúsculas (2 ou 3 caracteres).");
     }
   }
 }

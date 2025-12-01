@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Core\Container;
 use App\Http\Message\Error;
-use App\Services\SessionService;
+use App\Services\Application\SessionService;
 use App\Utils\Cache;
 use App\Utils\Logger;
 

@@ -36,6 +36,11 @@ class Router
     $this->response = new Response();
   }
 
+  public function container(): Container
+  {
+    return $this->container;
+  }
+
   private function methodAllowed(string $httpMethod): bool
   {
     return \in_array($httpMethod, $this->enableMethods);
@@ -223,10 +228,7 @@ class Router
 
       throw new Exception("Route not found", 404);
     } catch (\Throwable $th) {
-      $handler = $this->container->make(Error::class);
-      $response = $handler->render($th);
-
-      return $response;
+      throw $th;
     }
   }
 }

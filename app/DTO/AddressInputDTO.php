@@ -24,14 +24,14 @@ class AddressInputDTO implements SanitizableDTO, ValidatableDTO
   public function sanitizations(): array
   {
     return [
-      'userId' => 'required|numeric',
-      'street' => 'required|numeric',
-      'number' => 'numeric',
-      'complement' => 'numeric',
-      'city' => 'required|numeric',
-      'state' => 'required|numeric',
-      'country' => 'required|numeric',
-      'postalCode' => 'required|numeric',
+      'userId' => 'trim|itrim|htmlspecialchars',
+      'street' => 'trim|itrim|htmlspecialchars|stripslashes',
+      'number' => 'trim|itrim|htmlspecialchars|stripslashes',
+      'complement' => 'trim|itrim|htmlspecialchars|stripslashes',
+      'city' => 'trim|itrim|htmlspecialchars',
+      'state' => 'trim|itrim|htmlspecialchars|strtoupper',
+      'country' => 'trim|itrim|htmlspecialchars|strtoupper',
+      'postalCode' => 'trim|itrim|htmlspecialchars',
     ];
   }
 
@@ -43,13 +43,13 @@ class AddressInputDTO implements SanitizableDTO, ValidatableDTO
   public function validations(): array
   {
     return [
-      'userId' => 'required|numeric',
-      'street' => 'required|numeric',
-      'number' => 'numeric',
-      'complement' => 'numeric',
-      'city' => 'required|numeric',
-      'state' => 'required|numeric',
-      'country' => 'required|numeric',
+      'userId' => 'required|positive',
+      'street' => 'required|string',
+      'number' => 'string',
+      'complement' => 'string',
+      'city' => 'required|alphabetic',
+      'state' => 'required|acronym',
+      'country' => 'required|acronym',
       'postalCode' => 'required|numeric',
     ];
   }
