@@ -6,6 +6,7 @@ use App\Domain\Addresses\Address;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\AddressInputDTO;
 use App\Exceptions\AddressCreationException;
+use App\Exceptions\AddressUpdateException;
 use App\Factories\AddressFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
@@ -59,5 +60,32 @@ class AddressesService
   public function byUser(int $userId): array
   {
     return $this->repo->forUser($userId);
+  }
+
+  public function update(AddressInputDTO $dto): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $this->v->validate($this->s->sanitize($dto));
+
+      $address = $this->factory->fromDTO($dto);
+      $updated = $this->repo->update($address, Address::FIELDS_UPDATE);
+
+      if (!$updated) {
+        throw new AddressUpdateException();
+      }
+
+      $this->eventLog->record(
+        EventType::CREATE,
+        "Endereço atualizado para o usuário {$dto->userId}: {$dto->street}, {$dto->number}, {$dto->city} - {$dto->state}, {$dto->country}, CEP {$dto->postalCode}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updated;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw new AddressUpdateException();
+    }
   }
 }

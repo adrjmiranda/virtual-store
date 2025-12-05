@@ -21,6 +21,17 @@ class Address extends DatabaseEntity
     'postal_code'
   ];
 
+  public const array FIELDS_UPDATE = [
+    'id',
+    'street',
+    'number',
+    'complement',
+    'city',
+    'state',
+    'country',
+    'postal_code'
+  ];
+
 
   public function __construct(
     private ?Id $id,
