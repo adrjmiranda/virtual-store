@@ -55,4 +55,9 @@ class AddressesService
   {
     return $this->repo->find($id);
   }
+
+  public function byUser(int $userId): array
+  {
+    return $this->repo->forUser($userId);
+  }
 }
