@@ -50,4 +50,9 @@ class AddressesService
       throw new AddressCreationException();
     }
   }
+
+  public function show(int $id): ?Address
+  {
+    return $this->repo->find($id);
+  }
 }
