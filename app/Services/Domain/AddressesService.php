@@ -6,12 +6,14 @@ use App\Domain\Addresses\Address;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\AddressInputDTO;
 use App\Exceptions\AddressCreationException;
+use App\Exceptions\AddressRemoveException;
 use App\Exceptions\AddressUpdateException;
 use App\Factories\AddressFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\AddressRepository;
 use App\Repository\EventLogRepository;
+use Exception;
 
 class AddressesService
 {
@@ -76,7 +78,7 @@ class AddressesService
       }
 
       $this->eventLog->record(
-        EventType::CREATE,
+        EventType::UPDATED,
         "Endereço atualizado para o usuário {$dto->userId}: {$dto->street}, {$dto->number}, {$dto->city} - {$dto->state}, {$dto->country}, CEP {$dto->postalCode}"
       );
 
@@ -86,6 +88,35 @@ class AddressesService
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw new AddressUpdateException();
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+
+      $address = $this->repo->find($id);
+      if (!$address) {
+        throw new Exception('Address not found', 404);
+      }
+
+      $deleted = $this->repo->delete($address);
+      if (!$deleted) {
+        throw new AddressRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Endereço removido para o usuário {$address->userIdValue()}: {$address->streetValue()}, {$address->numberValue()}, {$address->cityValue()} - {$address->stateValue()}, {$address->countryValue()}, CEP {$address->postalCodeValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw new AddressRemoveException();
     }
   }
 }
