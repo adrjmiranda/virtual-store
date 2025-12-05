@@ -18,7 +18,7 @@ class AddressFactory
   public function fromDTO(AddressInputDTO $dto, ?Address $address = null): Address
   {
     return new Address(
-      id: $address?->idValue(),
+      id: $address?->id(),
       userId: $address === null ? new UserId($dto->userId) : $address->userId(),
       street: $address === null ? new Street($dto->street) : $address->street(),
       number: $address === null ? ($dto->number ? new Number($dto->number) : null) : $address->number(),
