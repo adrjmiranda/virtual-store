@@ -64,27 +64,35 @@ class AddressesService
     return $this->repo->forUser($userId);
   }
 
-  public function update(AddressInputDTO $dto): ?Address
+  public function update(int $id, AddressInputDTO $dto, array $fields): ?Address
   {
     try {
       $this->repo->queryBuilder()->startTransaction();
       $this->v->validate($this->s->sanitize($dto));
 
-      $address = $this->factory->fromDTO($dto);
-      $updated = $this->repo->update($address, Address::FIELDS_UPDATE);
+      $addressToUpdate = $this->repo->find($id);
+      if (!$addressToUpdate) {
+        throw new Exception('Address not found.', 500);
+      }
+      $address = $this->factory->fromDTO($dto, $addressToUpdate);
+      $updated = $this->repo->update($address, $fields);
 
       if (!$updated) {
         throw new AddressUpdateException();
       }
 
-      $this->eventLog->record(
-        EventType::UPDATED,
-        "Endereço atualizado para o usuário {$dto->userId}: {$dto->street}, {$dto->number}, {$dto->city} - {$dto->state}, {$dto->country}, CEP {$dto->postalCode}"
-      );
+      $updatedAddress = $updated ? $this->repo->find($address->idValue()) : null;
+
+      if ($updatedAddress !== null) {
+        $this->eventLog->record(
+          EventType::UPDATED,
+          "Endereço atualizado para o usuário {$updatedAddress->userIdValue()}: {$updatedAddress->streetValue()}, {$updatedAddress->numberValue()}, {$updatedAddress->cityValue()} - {$updatedAddress->stateValue()}, {$updatedAddress->countryValue()}, CEP {$updatedAddress->postalCodeValue()}"
+        );
+      }
 
       $this->repo->queryBuilder()->finishTransaction();
 
-      return $updated ? $this->repo->find($address->idValue()) : null;
+      return $updatedAddress;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw new AddressUpdateException();

@@ -2,7 +2,6 @@
 
 namespace App\Infrastructure\Validations;
 
-use App\Contracts\DTO\ValidatableDTO;
 use InvalidArgumentException;
 
 class Validation
@@ -42,7 +41,7 @@ class Validation
     return [$rule, []];
   }
 
-  public function validate(ValidatableDTO $dto): void
+  public function validate(object $dto): void
   {
     $rules = $dto->validations();
     foreach ($rules as $field => $ruleList) {

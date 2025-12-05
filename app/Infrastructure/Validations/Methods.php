@@ -8,16 +8,19 @@ use App\Exceptions\InvalidAlphabeticWithAccentsException;
 use App\Exceptions\InvalidAlphabeticWithHifenException;
 use App\Exceptions\InvalidAlphabeticWithSpacesException;
 use App\Exceptions\InvalidAlphaNumericException;
+use App\Exceptions\InvalidDateException;
 use App\Exceptions\InvalidIntegerException;
 use App\Exceptions\InvalidMaxLenException;
 use App\Exceptions\InvalidMinLenException;
 use App\Exceptions\InvalidNegativeIntegerException;
 use App\Exceptions\InvalidPositiveIntegerException;
 use App\Exceptions\InvalidRealException;
+use App\Exceptions\InvalidRoleException;
 use App\Exceptions\InvalidStringException;
 use App\Exceptions\RequiredFieldException;
 use App\Exceptions\InvalidEmailException;
 use App\Exceptions\InvalidNumericException;
+use DateTime;
 use InvalidArgumentException;
 
 trait Methods
@@ -234,6 +237,25 @@ trait Methods
 
     if (!preg_match('/^[A-Z]{2,3}$/', $value)) {
       throw new InvalidStringException($field, "O campo deve conter apenas letras maiúsculas (2 ou 3 caracteres).");
+    }
+  }
+
+  private function in(string $field, string $value, array $params): void
+  {
+    if (!\in_array($value, $params)) {
+      throw new InvalidRoleException($field);
+    }
+  }
+
+  private function date(string $field, string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    $dt = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+    if ($dt === false) {
+      throw new InvalidDateException($field);
     }
   }
 }

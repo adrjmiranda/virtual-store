@@ -60,6 +60,7 @@ abstract class BaseRepository
    */
   public function update(object $entity, array $fields): bool
   {
+    $fields[] = 'id';
     $data = $entity->toDatabase($fields);
     unset($data['id']);
     $id = $entity->idValue();

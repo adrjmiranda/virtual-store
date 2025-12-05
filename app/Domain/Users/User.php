@@ -10,6 +10,13 @@ use App\Domain\ValueObjects\UpdatedAt;
 
 class User extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'name',
+    'email',
+    'password',
+    'role',
+  ];
+
   public function __construct(
     private ?Id $id,
     private Name $name,

@@ -5,19 +5,19 @@ namespace App\DTO;
 use App\Contracts\DTO\SanitizableDTO;
 use App\Contracts\DTO\ValidatableDTO;
 
-class AddressInputDTO implements SanitizableDTO, ValidatableDTO
+class AddressInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
 {
-  private string $fieldPrefix = 'address';
+  protected string $fieldPrefix = 'address';
 
   public function __construct(
-    public int $userId,
-    public string $street,
-    public ?string $number,
-    public ?string $complement,
-    public string $city,
-    public string $state,
-    public string $country,
-    public string $postalCode,
+    public ?int $userId = null,
+    public ?string $street = null,
+    public ?string $number = null,
+    public ?string $complement = null,
+    public ?string $city = null,
+    public ?string $state = null,
+    public ?string $country = null,
+    public ?string $postalCode = null,
   ) {
   }
 
@@ -33,11 +33,6 @@ class AddressInputDTO implements SanitizableDTO, ValidatableDTO
       'country' => 'trim|itrim|htmlspecialchars|strtoupper',
       'postalCode' => 'trim|itrim|htmlspecialchars',
     ];
-  }
-
-  public function fieldPrefix(): string
-  {
-    return "{$this->fieldPrefix}_";
   }
 
   public function validations(): array
