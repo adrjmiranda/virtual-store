@@ -64,7 +64,7 @@ class AddressesService
     return $this->repo->forUser($userId);
   }
 
-  public function update(AddressInputDTO $dto): bool
+  public function update(AddressInputDTO $dto): ?Address
   {
     try {
       $this->repo->queryBuilder()->startTransaction();
@@ -84,7 +84,7 @@ class AddressesService
 
       $this->repo->queryBuilder()->finishTransaction();
 
-      return $updated;
+      return $updated ? $this->repo->find($address->idValue()) : null;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw new AddressUpdateException();
