@@ -40,14 +40,19 @@ class AddressesService
         throw new AddressCreationException();
       }
 
-      $this->eventLog->record(
-        EventType::CREATE,
-        "Endereço criado para o usuário {$dto->userId}: {$dto->street}, {$dto->number}, {$dto->city} - {$dto->state}, {$dto->country}, CEP {$dto->postalCode}"
-      );
+      $createdAddress = $this->repo->find($id);
+
+      if ($createdAddress !== null) {
+
+        $this->eventLog->record(
+          EventType::CREATE,
+          "Endereço criado para o usuário {$createdAddress->userIdValue()}: {$createdAddress->streetValue()}, {$createdAddress->numberValue()}, {$createdAddress->cityValue()} - {$createdAddress->stateValue()}, {$createdAddress->countryValue()}, CEP {$createdAddress->postalCodeValue()}"
+        );
+      }
 
       $this->repo->queryBuilder()->finishTransaction();
 
-      return $this->repo->find($id);
+      return $createdAddress;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw new AddressCreationException();

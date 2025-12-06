@@ -14,4 +14,14 @@ class UserRepository extends BaseRepository
   {
     parent::__construct($db, self::TABLE, User::class);
   }
+
+  public function forEmail(string $email): ?User
+  {
+    $row = $this->queryBuilder
+      ->from($this->table)
+      ->andWhere('email', '=', $email)
+      ->first();
+
+    return $row ? User::fromDatabase($row) : null;
+  }
 }
