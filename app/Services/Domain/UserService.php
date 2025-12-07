@@ -7,6 +7,7 @@ use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\UserInputDTO;
 use App\Exceptions\UserAlreadyExistsException;
 use App\Exceptions\UserCreationException;
+use App\Exceptions\UserRemoveException;
 use App\Exceptions\UserUpdateExcepction;
 use App\Factories\UserFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -98,7 +99,6 @@ class UserService
         );
       }
 
-
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedUser;
@@ -108,7 +108,33 @@ class UserService
     }
   }
 
-  public function delete()
+  public function remove(int $id): bool
   {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+
+      $user = $this->repo->find($id);
+      if (!$user) {
+        throw new Exception('User not found', 404);
+      }
+
+      $deleted = $this->repo->delete($user);
+      if (!$deleted) {
+        throw new UserRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Usuário '{$user->nameValue()}' removido (ID: {$id}, Email: {$user->emailValue()})"
+      );
+
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw new UserRemoveException();
+    }
   }
 }
