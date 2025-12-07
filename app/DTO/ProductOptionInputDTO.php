@@ -7,7 +7,7 @@ use App\Contracts\DTO\ValidatableDTO;
 
 class ProductOptionInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
 {
-  protected string $fieldPrefix;
+  protected string $fieldPrefix = 'product_option';
 
   public function __construct(
     public ?int $productId,
