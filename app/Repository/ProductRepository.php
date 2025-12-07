@@ -14,4 +14,14 @@ class ProductRepository extends BaseRepository
   {
     parent::__construct($db, self::TABLE, Product::class);
   }
+
+  public function forSlug(string $slug): ?Product
+  {
+    $row = $this->queryBuilder
+      ->from($this->table)
+      ->andWhere('slug', '=', $slug)
+      ->first();
+
+    return $row ? Product::fromDatabase($row) : null;
+  }
 }

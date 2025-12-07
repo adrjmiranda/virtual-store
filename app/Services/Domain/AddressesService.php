@@ -30,8 +30,8 @@ class AddressesService
   {
     try {
       $this->repo->queryBuilder()->startTransaction();
-
-      $this->v->validate($this->s->sanitize($dto));
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
 
       $address = $this->factory->fromDTO($dto);
       $id = $this->repo->insert($address, Address::FIELDS_INSERT);
@@ -41,20 +41,21 @@ class AddressesService
       }
 
       $createdAddress = $this->repo->find($id);
-
-      if ($createdAddress !== null) {
-        $this->eventLog->record(
-          EventType::CREATE,
-          "Endereço criado para o usuário {$createdAddress->userIdValue()}: {$createdAddress->streetValue()}, {$createdAddress->numberValue()}, {$createdAddress->cityValue()} - {$createdAddress->stateValue()}, {$createdAddress->countryValue()}, CEP {$createdAddress->postalCodeValue()}"
-        );
+      if ($createdAddress === null) {
+        throw new AddressCreationException();
       }
+
+      $this->eventLog->record(
+        EventType::CREATE,
+        "Endereço criado para o usuário {$createdAddress->userIdValue()}: {$createdAddress->streetValue()}, {$createdAddress->numberValue()}, {$createdAddress->cityValue()} - {$createdAddress->stateValue()}, {$createdAddress->countryValue()}, CEP {$createdAddress->postalCodeValue()}"
+      );
 
       $this->repo->queryBuilder()->finishTransaction();
 
       return $createdAddress;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
-      throw new AddressCreationException();
+      throw $th;
     }
   }
 
@@ -72,7 +73,8 @@ class AddressesService
   {
     try {
       $this->repo->queryBuilder()->startTransaction();
-      $this->v->validate($this->s->sanitize($dto));
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
 
       $addressToUpdate = $this->repo->find($id);
       if (!$addressToUpdate) {
@@ -86,20 +88,21 @@ class AddressesService
       }
 
       $updatedAddress = $updated ? $this->repo->find($address->idValue()) : null;
-
-      if ($updatedAddress !== null) {
-        $this->eventLog->record(
-          EventType::UPDATED,
-          "Endereço atualizado para o usuário {$updatedAddress->userIdValue()}: {$updatedAddress->streetValue()}, {$updatedAddress->numberValue()}, {$updatedAddress->cityValue()} - {$updatedAddress->stateValue()}, {$updatedAddress->countryValue()}, CEP {$updatedAddress->postalCodeValue()}"
-        );
+      if ($updatedAddress === null) {
+        throw new AddressUpdateException();
       }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Endereço atualizado para o usuário {$updatedAddress->userIdValue()}: {$updatedAddress->streetValue()}, {$updatedAddress->numberValue()}, {$updatedAddress->cityValue()} - {$updatedAddress->stateValue()}, {$updatedAddress->countryValue()}, CEP {$updatedAddress->postalCodeValue()}"
+      );
 
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedAddress;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
-      throw new AddressUpdateException();
+      throw $th;
     }
   }
 
@@ -128,7 +131,7 @@ class AddressesService
       return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
-      throw new AddressRemoveException();
+      throw $th;
     }
   }
 }

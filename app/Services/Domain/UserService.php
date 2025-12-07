@@ -31,11 +31,12 @@ class UserService
   {
     try {
       $this->repo->queryBuilder()->startTransaction();
-      $this->v->validate($this->s->sanitize($dto));
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
       $user = $this->factory->fromDTO($dto);
 
       $userByEmail = $this->repo->forEmail($user->emailValue());
-      if ($userByEmail) {
+      if ($userByEmail !== null) {
         throw new UserAlreadyExistsException();
       }
 
@@ -46,20 +47,21 @@ class UserService
       }
 
       $createdUser = $this->repo->find($id);
-
-      if ($createdUser !== null) {
-        $this->eventLog->record(
-          EventType::CREATE,
-          "Usuário '{$createdUser->nameValue()}' criado com email '{$createdUser->emailValue()}'"
-        );
+      if ($createdUser === null) {
+        throw new UserCreationException();
       }
+
+      $this->eventLog->record(
+        EventType::CREATE,
+        "Usuário '{$createdUser->nameValue()}' criado com email '{$createdUser->emailValue()}'"
+      );
 
       $this->repo->queryBuilder()->finishTransaction();
 
       return $createdUser;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
-      throw new UserCreationException();
+      throw $th;
     }
   }
 
@@ -77,7 +79,8 @@ class UserService
   {
     try {
       $this->repo->queryBuilder()->startTransaction();
-      $this->v->validate($this->s->sanitize($dto));
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
 
       $userToUpdate = $this->repo->find($id);
       if (!$userToUpdate) {
@@ -86,31 +89,31 @@ class UserService
       $user = $this->factory->fromDTO($dto, $userToUpdate);
 
       $userByEmail = $this->repo->forEmail($user->emailValue());
-      if ($userByEmail && $userToUpdate->emailValue() !== $userByEmail->emailValue()) {
+      if ($userByEmail !== null && $userToUpdate->emailValue() !== $userByEmail->emailValue()) {
         throw new UserAlreadyExistsException();
       }
 
       $updated = $this->repo->update($user, $fields);
-
       if (!$updated) {
         throw new UserUpdateExcepction();
       }
 
       $updatedUser = $updated ? $this->repo->find($id) : null;
-
-      if ($updatedUser !== null) {
-        $this->eventLog->record(
-          EventType::UPDATED,
-          "Usuário '{$updatedUser->nameValue()}' atualizado com email '{$updatedUser->emailValue()}' (ID: {$id})"
-        );
+      if ($updatedUser === null) {
+        throw new UserUpdateExcepction();
       }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Usuário '{$updatedUser->nameValue()}' atualizado com email '{$updatedUser->emailValue()}' (ID: {$id})"
+      );
 
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedUser;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
-      throw new UserUpdateExcepction();
+      throw $th;
     }
   }
 
@@ -134,13 +137,12 @@ class UserService
         "Usuário '{$user->nameValue()}' removido (ID: {$id}, Email: {$user->emailValue()})"
       );
 
-
       $this->repo->queryBuilder()->finishTransaction();
 
       return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
-      throw new UserRemoveException();
+      throw $th;
     }
   }
 }
