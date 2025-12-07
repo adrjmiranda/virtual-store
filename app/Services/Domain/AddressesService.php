@@ -43,7 +43,6 @@ class AddressesService
       $createdAddress = $this->repo->find($id);
 
       if ($createdAddress !== null) {
-
         $this->eventLog->record(
           EventType::CREATE,
           "Endereço criado para o usuário {$createdAddress->userIdValue()}: {$createdAddress->streetValue()}, {$createdAddress->numberValue()}, {$createdAddress->cityValue()} - {$createdAddress->stateValue()}, {$createdAddress->countryValue()}, CEP {$createdAddress->postalCodeValue()}"

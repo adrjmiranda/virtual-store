@@ -16,6 +16,16 @@ use App\Domain\ValueObjects\UpdatedAt;
 
 class Product extends DatabaseEntity
 {
+
+  public const array FIELDS_INSERT = [
+    'name',
+    'slug',
+    'description',
+    'price',
+    'stock',
+    'is_active'
+  ];
+
   public function __construct(
     private ?Id $id,
     private Name $name,
