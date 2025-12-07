@@ -5,7 +5,7 @@ namespace App\DTO;
 use App\Contracts\DTO\SanitizableDTO;
 use App\Contracts\DTO\ValidatableDTO;
 
-class ProductnputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
+class ProductInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
 {
   protected $fieldPrefix = 'product';
 

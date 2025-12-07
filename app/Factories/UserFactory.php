@@ -2,6 +2,7 @@
 
 namespace App\Factories;
 
+use App\Domain\Users\DeletedAt;
 use App\Domain\Users\Email;
 use App\Domain\Users\EmailVerifiedAt;
 use App\Domain\Users\Password;
@@ -24,7 +25,7 @@ class UserFactory
       role: $dto->role === null ? $user?->role() : new Role(UserRole::from($dto->role)),
       createdAt: null,
       updatedAt: null,
-      deletedAt: $user?->deletedAt()
+      deletedAt: $dto->deletedAt === null ? $user?->deleted() : new DeletedAt($dto->deletedAt)
     );
   }
 }
