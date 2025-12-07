@@ -61,4 +61,9 @@ class CategoryService
       throw $th;
     }
   }
+
+  public function show(int $id): ?Category
+  {
+    return $this->repo->find($id);
+  }
 }
