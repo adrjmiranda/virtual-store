@@ -60,8 +60,14 @@ class UserService
     }
   }
 
-  public function show()
+  public function show(int $id): ?User
   {
+    return $this->repo->find($id);
+  }
+
+  public function byEmail(string $email): ?User
+  {
+    return $this->repo->forEmail($email);
   }
 
   public function update()
