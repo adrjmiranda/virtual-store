@@ -54,4 +54,9 @@ class ProductOptionValueService
       throw $th;
     }
   }
+
+  public function show(int $id): ?ProductOptionValue
+  {
+    return $this->repo->find($id);
+  }
 }
