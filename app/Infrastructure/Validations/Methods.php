@@ -17,6 +17,7 @@ use App\Exceptions\InvalidNegativeIntegerException;
 use App\Exceptions\InvalidPositiveIntegerException;
 use App\Exceptions\InvalidRealException;
 use App\Exceptions\InvalidRoleException;
+use App\Exceptions\InvalidSlugException;
 use App\Exceptions\InvalidStringException;
 use App\Exceptions\RequiredFieldException;
 use App\Exceptions\InvalidEmailException;
@@ -268,6 +269,17 @@ trait Methods
 
     if (!\is_bool($value)) {
       throw new InvalidBoolException($field);
+    }
+  }
+
+  public function slug(string $field, string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (!preg_match('/^[a-z0-9-]+$/i', $value)) {
+      throw new InvalidSlugException($field);
     }
   }
 }

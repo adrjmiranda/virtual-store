@@ -36,8 +36,8 @@ class ProductInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
   public function validations(): array
   {
     return [
-      'name' => 'required|min:2|max:255',
-      'slug' => 'required|max:272',
+      'name' => 'required|string|min:2|max:255',
+      'slug' => 'required|slug|max:272',
       'description' => 'string|max:1000',
       'price' => 'required|integer',
       'stock' => 'required|integer',
