@@ -53,4 +53,9 @@ class ProductService
       $this->repo->queryBuilder()->cancelTransaction();
     }
   }
+
+  public function product(int $id): ?Product
+  {
+    return $this->repo->find($id);
+  }
 }
