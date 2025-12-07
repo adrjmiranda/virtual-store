@@ -36,7 +36,7 @@ class UserInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
     return [
       'name' => 'required|string|min:2|max:255',
       'email' => 'required|email',
-      'password' => 'required|string|min:6|max:255',
+      'password' => 'required|string|min:8|max:255',
       'role' => 'in:user:admin:manager',
 
       'emailVerifiedAt' => 'date',

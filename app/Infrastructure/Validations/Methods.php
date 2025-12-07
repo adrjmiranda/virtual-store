@@ -8,6 +8,7 @@ use App\Exceptions\InvalidAlphabeticWithAccentsException;
 use App\Exceptions\InvalidAlphabeticWithHifenException;
 use App\Exceptions\InvalidAlphabeticWithSpacesException;
 use App\Exceptions\InvalidAlphaNumericException;
+use App\Exceptions\InvalidBoolException;
 use App\Exceptions\InvalidDateException;
 use App\Exceptions\InvalidIntegerException;
 use App\Exceptions\InvalidMaxLenException;
@@ -256,6 +257,17 @@ trait Methods
     $dt = DateTime::createFromFormat('Y-m-d H:i:s', $value);
     if ($dt === false) {
       throw new InvalidDateException($field);
+    }
+  }
+
+  public function boolean(string $field, mixed $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (!\is_bool($value)) {
+      throw new InvalidBoolException($field);
     }
   }
 }

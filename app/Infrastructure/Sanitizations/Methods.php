@@ -8,4 +8,9 @@ trait Methods
   {
     return preg_replace('/\s+/', ' ', $value);
   }
+
+  private function noop(mixed $value): mixed
+  {
+    return $value;
+  }
 }
