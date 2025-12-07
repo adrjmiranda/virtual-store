@@ -84,6 +84,12 @@ class UserService
         throw new Exception('User not found.', 500);
       }
       $user = $this->factory->fromDTO($dto, $userToUpdate);
+
+      $userByEmail = $this->repo->forEmail($user->emailValue());
+      if ($userByEmail && $userToUpdate->emailValue() !== $userByEmail->emailValue()) {
+        throw new UserAlreadyExistsException();
+      }
+
       $updated = $this->repo->update($user, $fields);
 
       if (!$updated) {
