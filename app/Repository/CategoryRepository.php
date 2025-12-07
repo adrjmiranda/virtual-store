@@ -14,4 +14,14 @@ class CategoryRepository extends BaseRepository
   {
     parent::__construct($db, self::TABLE, Category::class);
   }
+
+  public function forSlug(string $slug): ?Category
+  {
+    $row = $this->queryBuilder
+      ->from($this->table)
+      ->andWhere('slug', '=', $slug)
+      ->first();
+
+    return $row ? Category::fromDatabase($row) : null;
+  }
 }
