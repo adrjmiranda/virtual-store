@@ -63,9 +63,14 @@ class ProductService
     }
   }
 
-  public function product(int $id): ?Product
+  public function show(int $id): ?Product
   {
     return $this->repo->find($id);
+  }
+
+  public function bySlug(string $slug): ?Product
+  {
+    return $this->repo->forSlug($slug);
   }
 
   public function update(int $id, ProductInputDTO $dto, array $fields): ?Product
