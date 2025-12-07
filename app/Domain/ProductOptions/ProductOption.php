@@ -10,6 +10,11 @@ use App\Domain\ValueObjects\UpdatedAt;
 
 class ProductOption extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'product_id',
+    'name',
+  ];
+
   public function __construct(
     private ?Id $id,
     private ProductId $productId,
