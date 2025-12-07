@@ -6,11 +6,13 @@ use App\Domain\ProductOptionValues\ProductOptionValue;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\ProductOptionValueInputDTO;
 use App\Exceptions\ProductOptionValueCreationException;
+use App\Exceptions\ProductOptionValueUpdateException;
 use App\Factories\ProductOptionValueFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\EventLogRepository;
 use App\Repository\ProductOptionValueRepository;
+use Exception;
 
 class ProductOptionValueService
 {
@@ -58,5 +60,43 @@ class ProductOptionValueService
   public function show(int $id): ?ProductOptionValue
   {
     return $this->repo->find($id);
+  }
+
+  public function update(int $id, ProductOptionValueInputDTO $dto, array $fields): ?ProductOptionValue
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
+
+      $productionOptionValueToUpdate = $this->repo->find($id);
+      if ($productionOptionValueToUpdate === null) {
+        throw new Exception('Product option value not found.', 500);
+      }
+      $productOptionValue = $this->factory->fromDTO($dto);
+      $updated = $this->repo->update($productOptionValue, $fields);
+
+
+      if (!$updated) {
+        throw new ProductOptionValueUpdateException();
+      }
+
+      $updatedProductOptionValue = $updated ? $this->repo->find($id) : null;
+      if ($updatedProductOptionValue === null) {
+        throw new ProductOptionValueUpdateException();
+      }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Opção e valor de produto atualizado ID: {$updatedProductOptionValue->idValue()} - opção: {$updatedProductOptionValue->optionIdValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updatedProductOptionValue;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
   }
 }

@@ -91,6 +91,7 @@ class ProductOptionService
       );
 
       $this->repo->queryBuilder()->finishTransaction();
+
       return $updatedProductOption;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
