@@ -7,11 +7,13 @@ use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\CategoryInputDTO;
 use App\Exceptions\CategoryCreationException;
 use App\Exceptions\CategorySlugAlreadyExists;
+use App\Exceptions\CategoryUpdateExcepction;
 use App\Factories\CategoryFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\CategoryRepository;
 use App\Repository\EventLogRepository;
+use Exception;
 
 class CategoryService
 {
@@ -70,5 +72,47 @@ class CategoryService
   public function bySlug(string $slug): ?Category
   {
     return $this->repo->forSlug($slug);
+  }
+
+  public function update(int $id, CategoryInputDTO $dto, array $fields): ?Category
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
+
+      $categoryToUpdate = $this->repo->find($id);
+      if ($categoryToUpdate === null) {
+        throw new Exception("Category not found", 500);
+      }
+      $category = $this->factory->fromDTO($dto);
+
+      $categoryBySlug = $this->repo->forSlug($category->slugValue());
+      if ($categoryBySlug !== null && $categoryToUpdate->slugValue() !== $categoryBySlug->slugValue()) {
+        throw new CategorySlugAlreadyExists();
+      }
+
+      $updated = $this->repo->update($category, $fields);
+      if (!$updated) {
+        throw new CategoryUpdateExcepction();
+      }
+
+      $updatedCategory = $updated ? $this->repo->find($id) : null;
+      if ($updatedCategory === null) {
+        throw new CategoryUpdateExcepction();
+      }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Categoria atualizada ID: {$id} - nome: {$updatedCategory->nameValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updatedCategory;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
   }
 }
