@@ -66,4 +66,9 @@ class CategoryService
   {
     return $this->repo->find($id);
   }
+
+  public function bySlug(string $slug): ?Category
+  {
+    return $this->repo->forSlug($slug);
+  }
 }
