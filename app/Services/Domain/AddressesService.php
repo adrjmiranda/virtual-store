@@ -112,7 +112,7 @@ class AddressesService
       $this->repo->queryBuilder()->startTransaction();
 
       $address = $this->repo->find($id);
-      if (!$address) {
+      if ($address === null) {
         throw new Exception('Address not found', 404);
       }
 

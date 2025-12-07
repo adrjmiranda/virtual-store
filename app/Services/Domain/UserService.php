@@ -123,7 +123,7 @@ class UserService
       $this->repo->queryBuilder()->startTransaction();
 
       $user = $this->repo->find($id);
-      if (!$user) {
+      if ($user === null) {
         throw new Exception('User not found', 404);
       }
 

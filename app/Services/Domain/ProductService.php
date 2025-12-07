@@ -6,6 +6,7 @@ use App\Domain\Products\Product;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\ProductInputDTO;
 use App\Exceptions\ProductCreationException;
+use App\Exceptions\ProductRemoveException;
 use App\Exceptions\ProductSlugAlreadyExists;
 use App\Exceptions\ProductUpdateException;
 use App\Factories\ProductFactory;
@@ -109,6 +110,35 @@ class ProductService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedProduct;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+
+      $product = $this->repo->find($id);
+      if ($product === null) {
+        throw new Exception("Product not found", 500);
+      }
+
+      $deleted = $this->repo->delete($product);
+      if (!$deleted) {
+        throw new ProductRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Produto removido ID: {$id} - nome: {$product->nameValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
