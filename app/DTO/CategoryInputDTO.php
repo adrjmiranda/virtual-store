@@ -5,7 +5,7 @@ namespace App\DTO;
 use App\Contracts\DTO\SanitizableDTO;
 use App\Contracts\DTO\ValidatableDTO;
 
-class CategoryDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
+class CategoryInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
 {
   protected string $fieldPrefix = 'category';
 
