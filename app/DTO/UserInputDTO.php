@@ -23,7 +23,7 @@ class UserInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
   {
     return [
       'name' => 'trim|itrim|htmlspecialchars|stripslashes',
-      'email' => 'trim|itrim|lowercase|emailsanitize',
+      'email' => 'trim|itrim|htmlspecialchars|stripslashes',
       'password' => 'trim',
       'role' => 'trim|lowercase',
       'emailVerifiedAt' => 'trim',

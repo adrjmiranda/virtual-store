@@ -24,7 +24,7 @@ class CategoryInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
       'name' => 'trim|itrim|htmlspecialchars|stripslashes',
       'slug' => 'trim|itrim|htmlspecialchars|stripslashes',
       'description' => 'trim|itrim|htmlspecialchars|stripslashes',
-      'parentId' => 'trim|itrim|htmlspecialchars',
+      'parentId' => 'trim|itrim',
       'isActive' => 'noop',
     ];
   }

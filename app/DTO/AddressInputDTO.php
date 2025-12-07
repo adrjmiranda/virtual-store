@@ -24,7 +24,7 @@ class AddressInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
   public function sanitizations(): array
   {
     return [
-      'userId' => 'trim|itrim|htmlspecialchars',
+      'userId' => 'trim|itrim',
       'street' => 'trim|itrim|htmlspecialchars|stripslashes',
       'number' => 'trim|itrim|htmlspecialchars|stripslashes',
       'complement' => 'trim|itrim|htmlspecialchars|stripslashes',
