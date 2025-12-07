@@ -118,7 +118,7 @@ class ProductOptionValueService
 
       $this->eventLog->record(
         EventType::DELETE,
-        "Opção e valor de produto removido ID: {$id} - OptionId: {$productionOptionValue->optionIdValue()}"
+        "Opção e valor de produto removido ID: {$id} - opção: {$productionOptionValue->optionIdValue()}"
       );
 
       $this->repo->queryBuilder()->finishTransaction();

@@ -6,6 +6,7 @@ use App\Domain\ProductOptions\ProductOption;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\ProductOptionInputDTO;
 use App\Exceptions\ProductOptionCreationException;
+use App\Exceptions\ProductOptionRemoveException;
 use App\Exceptions\ProductOptionUpdateException;
 use App\Factories\ProductOptionFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -93,6 +94,35 @@ class ProductOptionService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedProductOption;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+
+      $productionOption = $this->repo->find($id);
+      if ($productionOption === null) {
+        throw new Exception('Product option not found.', 500);
+      }
+
+      $deleted = $this->repo->delete($productionOption);
+      if (!$deleted) {
+        throw new ProductOptionRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Opção de produto removida ID: {$id} - nome: {$productionOption->nameValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
