@@ -6,11 +6,13 @@ use App\Domain\ProductVariants\ProductVariant;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\ProductVariantInputDTO;
 use App\Exceptions\ProductVariantCreationException;
+use App\Exceptions\ProductVariantUpdateException;
 use App\Factories\ProductVariantFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\EventLogRepository;
 use App\Repository\ProductVariantRepository;
+use Exception;
 
 class ProductVariantService
 {
@@ -61,10 +63,42 @@ class ProductVariantService
     return $this->repo->find($id);
   }
 
+  public function update(int $id, ProductVariantInputDTO $dto, array $fields): ?ProductVariant
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
 
-  // ToDo:
-  // Function UPDATE
+      $productVariantToUpdate = $this->repo->find($id);
+      if ($productVariantToUpdate === null) {
+        throw new Exception("Product variant not found", 500);
+      }
+      $productVarint = $this->factory->fromDTO($dto);
+      $updated = $this->repo->update($productVarint, $fields);
 
+      if (!$updated) {
+        throw new ProductVariantUpdateException();
+      }
+
+      $updatedProductVariant = $updated ? $this->repo->find($id) : null;
+      if ($updatedProductVariant === null) {
+        throw new ProductVariantUpdateException();
+      }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Variação de produto atualizada ID: {$id} - nome: {$updatedProductVariant->nameValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updatedProductVariant;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
 
   // ToDo:
   // Function REMOVE
