@@ -6,11 +6,13 @@ use App\Domain\Orders\Order;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\OrderInputDTO;
 use App\Exceptions\OrderCreationException;
+use App\Exceptions\OrderUpdateException;
 use App\Factories\OrderFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\EventLogRepository;
 use App\Repository\OrderRepository;
+use Exception;
 use ReturnTypeWillChange;
 
 class OrderService
@@ -44,7 +46,7 @@ class OrderService
 
       $this->eventLog->record(
         EventType::CREATE,
-        "Order criada: ID {$order->idValue()} Usuário {$order->userIdValue()}"
+        "Ordem criada: ID {$order->idValue()} Usuário {$order->userIdValue()}"
       );
 
       $this->repo->queryBuilder()->finishTransaction();
@@ -59,5 +61,41 @@ class OrderService
   public function show(int $id): ?Order
   {
     return $this->repo->find($id);
+  }
+
+  public function update(int $id, OrderInputDTO $dto, array $fields): ?Order
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
+      $orderToUpdate = $this->repo->find($id);
+      if ($orderToUpdate === null) {
+        throw new Exception('Order not found.', 500);
+      }
+      $order = $this->factory->fromDTO($dto);
+      $updated = $this->repo->update($order, $fields);
+
+      if (!$updated) {
+        throw new OrderUpdateException();
+      }
+
+      $updatedOrder = $updated ? $this->repo->find($id) : null;
+      if ($updatedOrder === null) {
+        throw new OrderUpdateException();
+      }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Ordem atualizada: ID {$updatedOrder->idValue()} Usuário {$updatedOrder->userIdValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updatedOrder;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
   }
 }
