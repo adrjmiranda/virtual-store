@@ -12,7 +12,7 @@ use App\DTO\ProductVariantInputDTO;
 
 class ProductVariantFactory
 {
-  public function fromDTO(ProductVariantInputDTO $dto, ?ProductVariant $productVariant): ProductVariant
+  public function fromDTO(ProductVariantInputDTO $dto, ?ProductVariant $productVariant = null): ProductVariant
   {
     return new ProductVariant(
       id: $productVariant?->id(),
