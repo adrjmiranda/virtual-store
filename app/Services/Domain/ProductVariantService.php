@@ -6,6 +6,7 @@ use App\Domain\ProductVariants\ProductVariant;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\ProductVariantInputDTO;
 use App\Exceptions\ProductVariantCreationException;
+use App\Exceptions\ProductVariantRemoveException;
 use App\Exceptions\ProductVariantUpdateException;
 use App\Factories\ProductVariantFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -88,7 +89,7 @@ class ProductVariantService
 
       $this->eventLog->record(
         EventType::UPDATED,
-        "Variação de produto atualizada ID: {$id} - nome: {$updatedProductVariant->nameValue()}"
+        "Variação de produto atualizada ID: {$id} - SKU: {$updatedProductVariant->skuValue()}"
       );
 
       $this->repo->queryBuilder()->finishTransaction();
@@ -100,6 +101,32 @@ class ProductVariantService
     }
   }
 
-  // ToDo:
-  // Function REMOVE
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+
+      $productVariant = $this->repo->find($id);
+      if ($productVariant === null) {
+        throw new Exception("Product variant not found", 500);
+      }
+
+      $deleted = $this->repo->delete($productVariant);
+      if (!$deleted) {
+        throw new ProductVariantRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Variação de produto removida ID: {$id} - SKU: {$productVariant->skuValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
 }
