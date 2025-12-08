@@ -11,6 +11,7 @@ use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\EventLogRepository;
 use App\Repository\OrderRepository;
+use ReturnTypeWillChange;
 
 class OrderService
 {
@@ -53,5 +54,10 @@ class OrderService
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
     }
+  }
+
+  public function show(int $id): ?Order
+  {
+    return $this->repo->find($id);
   }
 }
