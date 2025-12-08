@@ -55,4 +55,17 @@ class ProductVariantService
       throw $th;
     }
   }
+
+  public function show(int $id): ?ProductVariant
+  {
+    return $this->repo->find($id);
+  }
+
+
+  // ToDo:
+  // Function UPDATE
+
+
+  // ToDo:
+  // Function REMOVE
 }
