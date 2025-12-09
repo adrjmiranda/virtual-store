@@ -6,6 +6,7 @@ use App\Domain\OrderItems\OrderItem;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\OrderItemInputDTO;
 use App\Exceptions\OrderItemCreationException;
+use App\Exceptions\OrderItemRemoveException;
 use App\Exceptions\OrderItemUpdateException;
 use App\Factories\OrderItemFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -92,6 +93,34 @@ class OrderItemService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedOrderItem;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $orderItem = $this->repo->find($id);
+      if ($orderItem === null) {
+        throw new Exception('Order item not found.', 500);
+      }
+
+      $deleted = $this->repo->delete($orderItem);
+      if (!$deleted) {
+        throw new OrderItemRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Item de ordem removido ID {$orderItem->idValue()} OrderId {$orderItem->orderIdValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;

@@ -114,7 +114,6 @@ class OrderService
         throw new OrderRemoveException();
       }
 
-
       $this->eventLog->record(
         EventType::DELETE,
         "Ordem removida: ID {$order->idValue()} Usuário {$order->userIdValue()}"
