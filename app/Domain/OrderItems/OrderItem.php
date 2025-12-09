@@ -12,6 +12,15 @@ use App\Domain\ValueObjects\VariantId;
 
 class OrderItem extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'order_id',
+    'product_id',
+    'variant_id',
+    'quantitty',
+    'unit_price',
+    'discount',
+  ];
+
   public function __construct(
     private ?Id $id,
     private OrderId $orderId,
