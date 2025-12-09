@@ -54,4 +54,9 @@ class OrderItemService
       throw $th;
     }
   }
+
+  public function show(int $id): ?OrderItem
+  {
+    return $this->repo->find($id);
+  }
 }
