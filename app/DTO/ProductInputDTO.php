@@ -39,8 +39,8 @@ class ProductInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
       'name' => 'required|string|min:2|max:255',
       'slug' => 'required|slug|max:272',
       'description' => 'string|max:1000',
-      'price' => 'required|integer',
-      'stock' => 'required|integer',
+      'price' => 'required|posandzero',
+      'stock' => 'required|posandzero',
       'isActive' => 'required|boolean',
       'deletedAt' => 'date',
     ];

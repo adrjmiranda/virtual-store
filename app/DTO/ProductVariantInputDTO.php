@@ -34,8 +34,8 @@ class ProductVariantInputDTO extends BaseDTO implements SanitizableDTO, Validata
     return [
       'productId' => 'required|positive',
       'sku' => 'required|alphanumeric',
-      'price' => 'required|integer',
-      'stock' => 'required|integer',
+      'price' => 'required|posandzero',
+      'stock' => 'required|posandzero',
       'isActive' => 'required|boolean',
     ];
   }

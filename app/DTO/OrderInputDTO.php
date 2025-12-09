@@ -32,7 +32,7 @@ class OrderInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
     return [
       'userId' => 'required|positive',
       'status' => 'required|in:pending:processing:completed:canceled',
-      'total' => 'required|integer',
+      'total' => 'required|posandzero',
       'shippingAddress' => 'string',
     ];
   }

@@ -14,6 +14,7 @@ use App\Exceptions\InvalidIntegerException;
 use App\Exceptions\InvalidMaxLenException;
 use App\Exceptions\InvalidMinLenException;
 use App\Exceptions\InvalidNegativeIntegerException;
+use App\Exceptions\InvalidPositiveAndZeroIntegerException;
 use App\Exceptions\InvalidPositiveIntegerException;
 use App\Exceptions\InvalidRealException;
 use App\Exceptions\InvalidRoleException;
@@ -94,6 +95,26 @@ trait Methods
 
     if (!\is_int($value)) {
       throw new InvalidPositiveIntegerException($field);
+    } else if ($value < 1) {
+      throw new InvalidPositiveIntegerException($field);
+    }
+  }
+
+  private function posandzero(string $field, int|string $value): void
+  {
+    if ($value === null || $value === '') {
+      return;
+    }
+
+    if (\is_string($value) && !preg_match('/^(0|[1-9][0-9]*)$/', $value)) {
+      throw new InvalidPositiveAndZeroIntegerException($field);
+    }
+
+
+    if (!\is_int($value)) {
+      throw new InvalidPositiveAndZeroIntegerException($field);
+    } else if ($value < 0) {
+      throw new InvalidPositiveAndZeroIntegerException($field);
     }
   }
 
