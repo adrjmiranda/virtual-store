@@ -6,6 +6,7 @@ use App\Domain\OrderDiscounts\OrderDiscount;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\OrderDiscountInputDTO;
 use App\Exceptions\OrderDiscountCreationException;
+use App\Exceptions\OrderDiscountRemoveException;
 use App\Exceptions\OrderDiscountUpdateException;
 use App\Factories\OrderDiscountFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -93,6 +94,36 @@ class OrderDiscountService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedOrderDiscount;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $orderDiscountItem = $this->repo->find($id);
+      if ($orderDiscountItem === null) {
+        throw new Exception('Order discount not found.', 500);
+      }
+
+
+      $deleted = $this->repo->delete($orderDiscountItem);
+      if (!$deleted) {
+        throw new OrderDiscountRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Desconto de ordem removida ID {$orderDiscountItem->idValue()} Code {$orderDiscountItem->discountCodeValue()}"
+      );
+
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
