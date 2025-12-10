@@ -109,7 +109,6 @@ class OrderDiscountService
         throw new Exception('Order discount not found.', 500);
       }
 
-
       $deleted = $this->repo->delete($orderDiscountItem);
       if (!$deleted) {
         throw new OrderDiscountRemoveException();
@@ -119,7 +118,6 @@ class OrderDiscountService
         EventType::DELETE,
         "Desconto de ordem removida ID {$orderDiscountItem->idValue()} Code {$orderDiscountItem->discountCodeValue()}"
       );
-
 
       $this->repo->queryBuilder()->finishTransaction();
 

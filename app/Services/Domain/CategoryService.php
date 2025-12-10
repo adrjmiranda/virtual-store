@@ -6,6 +6,7 @@ use App\Domain\Categories\Category;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\CategoryInputDTO;
 use App\Exceptions\CategoryCreationException;
+use App\Exceptions\CategoryRemoveException;
 use App\Exceptions\CategorySlugAlreadyExists;
 use App\Exceptions\CategoryUpdateExcepction;
 use App\Factories\CategoryFactory;
@@ -110,6 +111,34 @@ class CategoryService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedCategory;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $category = $this->repo->find($id);
+      if ($category === null) {
+        throw new Exception('Category not found.', 500);
+      }
+
+      $deleted = $this->repo->delete($category);
+      if (!$deleted) {
+        throw new CategoryRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Categoria removida ID: {$id} - nome: {$category->nameValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
