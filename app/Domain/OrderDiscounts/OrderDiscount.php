@@ -10,6 +10,12 @@ use App\Domain\ValueObjects\UpdatedAt;
 
 class OrderDiscount extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'order_id',
+    'discount_code',
+    'discount_amount',
+  ];
+
   public function __construct(
     private ?Id $id,
     private OrderId $orderId,
