@@ -6,6 +6,7 @@ use App\Domain\Payments\Payment;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\PaymentInputDTO;
 use App\Exceptions\PaymentCreationException;
+use App\Exceptions\PaymentRemoveException;
 use App\Exceptions\PaymentUpdateException;
 use App\Factories\PaymentFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -92,6 +93,34 @@ class PaymentService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedPayment;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $payment = $this->repo->find($id);
+      if ($payment === null) {
+        throw new Exception("Payment not found", 500);
+      }
+
+      $deleted = $this->repo->delete($payment);
+      if (!$deleted) {
+        throw new PaymentRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Pagamento atualizado ID: {$payment->idValue()} Método {$payment->methodValue()} Amount {$payment->amountValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
