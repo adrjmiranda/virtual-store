@@ -10,6 +10,15 @@ use App\Domain\ValueObjects\UserId;
 
 class Payment extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'user_id',
+    'amount',
+    'method',
+    'status',
+    'transaction_id',
+    'paid_at',
+  ];
+
   public function __construct(
     private ?Id $id,
     private UserId $userId,
