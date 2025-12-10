@@ -6,11 +6,13 @@ use App\Domain\OrderDiscounts\OrderDiscount;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\OrderDiscountInputDTO;
 use App\Exceptions\OrderDiscountCreationException;
+use App\Exceptions\OrderDiscountUpdateException;
 use App\Factories\OrderDiscountFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\EventLogRepository;
 use App\Repository\OrderDiscountRepository;
+use Exception;
 
 class OrderDiscountService
 {
@@ -59,5 +61,41 @@ class OrderDiscountService
   public function show(int $id): ?OrderDiscount
   {
     return $this->repo->find($id);
+  }
+
+  public function update(int $id, OrderDiscountInputDTO $dto, array $fields): ?OrderDiscount
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
+      $orderDiscountToUpdate = $this->repo->find($id);
+      if ($orderDiscountToUpdate === null) {
+        throw new Exception('Order discount not found.', 500);
+      }
+      $orderDiscount = $this->factory->fromDTO($dto);
+      $updated = $this->repo->update($orderDiscount, $fields);
+
+      if (!$updated) {
+        throw new OrderDiscountUpdateException();
+      }
+
+      $updatedOrderDiscount = $updated ? $this->repo->find($id) : null;
+      if ($updatedOrderDiscount === null) {
+        throw new OrderDiscountUpdateException();
+      }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Desconto de ordem atualizado ID {$updatedOrderDiscount->idValue()} Code {$updatedOrderDiscount->discountCodeValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updatedOrderDiscount;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
   }
 }
