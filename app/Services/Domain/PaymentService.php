@@ -54,4 +54,9 @@ class PaymentService
       throw $th;
     }
   }
+
+  public function show(int $id): ?Payment
+  {
+    return $this->repo->find($id);
+  }
 }
