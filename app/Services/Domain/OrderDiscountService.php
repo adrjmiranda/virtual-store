@@ -55,4 +55,9 @@ class OrderDiscountService
       throw $th;
     }
   }
+
+  public function show(int $id): ?OrderDiscount
+  {
+    return $this->repo->find($id);
+  }
 }
