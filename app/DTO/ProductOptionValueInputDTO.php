@@ -18,7 +18,7 @@ class ProductOptionValueInputDTO extends BaseDTO implements SanitizableDTO, Vali
   public function sanitizations(): array
   {
     return [
-      'optionId' => 'trim|itrim',
+      'optionId' => 'noop',
       'value' => 'trim|itrim|htmlspecialchars|stripslashes'
     ];
   }

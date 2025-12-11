@@ -21,10 +21,10 @@ class ProductVariantInputDTO extends BaseDTO implements SanitizableDTO, Validata
   public function sanitizations(): array
   {
     return [
-      'productId' => 'trim|itrim',
+      'productId' => 'noop',
       'sku' => 'trim|itrim|htmlspecialchars|stripslashes',
-      'price' => 'trim|itrim',
-      'stock' => 'trim|itrim',
+      'price' => 'noop',
+      'stock' => 'noop',
       'isActive' => 'noop',
     ];
   }

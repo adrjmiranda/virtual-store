@@ -12,6 +12,14 @@ use App\Domain\ValueObjects\VariantId;
 
 class CartItem extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'cart_id',
+    'product_id',
+    'variant_id',
+    'quantity',
+    'price',
+  ];
+
   public function __construct(
     private ?Id $id,
     private CartId $cartId,

@@ -22,8 +22,8 @@ class PaymentInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
   public function sanitizations(): array
   {
     return [
-      'userId' => 'trim|itrim',
-      'amount' => 'trim|itrim',
+      'userId' => 'noop',
+      'amount' => 'noop',
       'method' => 'trim|itrim|htmlspecialchars|stripslashes',
       'status' => 'trim|itrim|htmlspecialchars|stripslashes',
       'transactionId' => 'trim|itrim|htmlspecialchars|stripslashes',

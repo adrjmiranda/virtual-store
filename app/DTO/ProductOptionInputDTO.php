@@ -18,7 +18,7 @@ class ProductOptionInputDTO extends BaseDTO implements SanitizableDTO, Validatab
   public function sanitizations(): array
   {
     return [
-      'productId' => 'trim|itrim',
+      'productId' => 'noop',
       'name' => 'trim|itrim|htmlspecialchars|stripslashes',
     ];
   }

@@ -5,41 +5,38 @@ namespace App\DTO;
 use App\Contracts\DTO\SanitizableDTO;
 use App\Contracts\DTO\ValidatableDTO;
 
-class OrderItemInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
+class CartItemInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
 {
-  protected string $fieldPrefix = 'order_item';
+  protected string $fieldPrefix = 'cart_item';
 
   public function __construct(
-    public ?int $orderId,
+    public ?int $cartId,
     public ?int $productId,
     public ?int $variantId,
     public ?int $quantity,
-    public ?int $unitPrice,
-    public ?int $discount,
+    public ?int $price,
   ) {
   }
 
   public function sanitizations(): array
   {
     return [
-      'orderId' => 'noop',
+      'cartId' => 'noop',
       'productId' => 'noop',
       'variantId' => 'noop',
       'quantity' => 'noop',
-      'unitPrice' => 'noop',
-      'discount' => 'noop',
+      'price' => 'noop',
     ];
   }
 
   public function validations(): array
   {
     return [
-      'orderId' => 'required|positive',
+      'cartId' => 'required|positive',
       'productId' => 'required|positive',
       'variantId' => 'positive',
       'quantity' => 'required|posandzero',
-      'unitPrice' => 'required|posandzero',
-      'discount' => 'required|posandzero',
+      'price' => 'required|posandzero',
     ];
   }
 }

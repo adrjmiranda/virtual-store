@@ -26,8 +26,8 @@ class ProductInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
       'name' => 'trim|itrim|htmlspecialchars',
       'slug' => 'trim|itrim|htmlspecialchars',
       'description' => 'trim|itrim|htmlspecialchars',
-      'price' => 'trim|itrim',
-      'stock' => 'trim|itrim',
+      'price' => 'noop',
+      'stock' => 'noop',
       'isActive' => 'noop',
       'deletedAt' => 'trim',
     ];

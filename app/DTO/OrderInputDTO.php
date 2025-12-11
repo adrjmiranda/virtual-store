@@ -20,7 +20,7 @@ class OrderInputDTO extends BaseDTO implements SanitizableDTO, ValidatableDTO
   public function sanitizations(): array
   {
     return [
-      'userId' => 'trim|itrim',
+      'userId' => 'noop',
       'status' => 'trim|itrim|htmlspecialchars|stripslashes',
       'total' => 'trim|itrim',
       'shippingAddress' => 'trim|itrim|htmlspecialchars|stripslashes',
