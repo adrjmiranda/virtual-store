@@ -6,6 +6,7 @@ use App\Domain\CartItems\CartItem;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\CartItemInputDTO;
 use App\Exceptions\CartItemCreationException;
+use App\Exceptions\CartItemRemoveException;
 use App\Exceptions\CartItemUpdateException;
 use App\Factories\CartItemFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -92,6 +93,34 @@ class CartItemService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedCartItem;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $cartItem = $this->repo->find($id);
+      if ($cartItem === null) {
+        throw new Exception("Cart item not found", 500);
+      }
+
+      $deleted = $this->repo->delete($cartItem);
+      if (!$deleted) {
+        throw new CartItemRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Item do carrinho atualizado ID {$cartItem->idValue()} ProductId {$cartItem->productIdValue()} Price {$cartItem->priceValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
