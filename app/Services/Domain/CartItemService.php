@@ -6,11 +6,13 @@ use App\Domain\CartItems\CartItem;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\CartItemInputDTO;
 use App\Exceptions\CartItemCreationException;
+use App\Exceptions\CartItemUpdateException;
 use App\Factories\CartItemFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
 use App\Infrastructure\Validations\Validation;
 use App\Repository\CartItemRepository;
 use App\Repository\EventLogRepository;
+use Exception;
 
 class CartItemService
 {
@@ -58,5 +60,41 @@ class CartItemService
   public function show(int $id): ?CartItem
   {
     return $this->repo->find($id);
+  }
+
+  public function update(int $id, CartItemInputDTO $dto, array $fields): ?CartItem
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $dto = $this->s->sanitize($dto);
+      $this->v->validate($dto);
+      $cartItemToUpdate = $this->repo->find($id);
+      if ($cartItemToUpdate === null) {
+        throw new Exception("Cart item not found", 500);
+      }
+      $cartItem = $this->factory->fromDTO($dto);
+      $updated = $this->repo->update($cartItem, $fields);
+
+      if (!$updated) {
+        throw new CartItemUpdateException();
+      }
+
+      $updatedCartItem = $updated ? $this->repo->find($id) : null;
+      if ($updatedCartItem === null) {
+        throw new CartItemUpdateException();
+      }
+
+      $this->eventLog->record(
+        EventType::UPDATED,
+        "Item do carrinho atualizado ID {$updatedCartItem->idValue()} ProductId {$updatedCartItem->productIdValue()} Price {$updatedCartItem->priceValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $updatedCartItem;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
   }
 }
