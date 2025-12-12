@@ -6,6 +6,7 @@ use App\Domain\Carts\Cart;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\CartInputDTO;
 use App\Exceptions\CartCreationException;
+use App\Exceptions\CartRemoveException;
 use App\Exceptions\CartUpdateException;
 use App\Factories\CartFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -92,6 +93,34 @@ class CartService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedCart;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $cart = $this->repo->find($id);
+      if ($cart === null) {
+        throw new Exception('Cart not found.', 500);
+      }
+
+      $deleted = $this->repo->delete($cart);
+      if (!$deleted) {
+        throw new CartRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Carrinho removido ID {$cart->idValue()} para o usuário de ID {$cart->userIdValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
