@@ -54,4 +54,9 @@ class CartService
       throw $th;
     }
   }
+
+  public function show(int $id): ?Cart
+  {
+    return $this->repo->find($id);
+  }
 }
