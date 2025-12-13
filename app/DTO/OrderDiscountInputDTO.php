@@ -21,7 +21,7 @@ class OrderDiscountInputDTO extends BaseDTO implements SanitizableDTO, Validatab
     return [
       'orderId' => 'noop',
       'discountCode' => 'trim|itrim|htmlspecialchars|stripslashes',
-      'discountAmount' => 'trim|itrim'
+      'discountAmount' => 'noop'
     ];
   }
 

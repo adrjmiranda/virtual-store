@@ -9,6 +9,16 @@ use App\Domain\ValueObjects\UpdatedAt;
 
 class Coupon extends DatabaseEntity
 {
+  public const array FIELDS_INSERT = [
+    'code',
+    'type',
+    'value',
+    'usage_limit',
+    'used_count',
+    'starts_at',
+    'expires_at',
+  ];
+
   public function __construct(
     private ?Id $id,
     private Code $code,
