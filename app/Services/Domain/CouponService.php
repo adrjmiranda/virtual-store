@@ -54,4 +54,9 @@ class CouponService
       throw $th;
     }
   }
+
+  public function show(int $id): ?Coupon
+  {
+    return $this->repo->find($id);
+  }
 }
