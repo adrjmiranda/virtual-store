@@ -6,6 +6,7 @@ use App\Domain\Coupons\Coupon;
 use App\Domain\ValueObjects\Enum\EventType;
 use App\DTO\CouponInputDTO;
 use App\Exceptions\CouponCreationException;
+use App\Exceptions\CouponRemoveException;
 use App\Exceptions\CouponUpdateException;
 use App\Factories\CouponFactory;
 use App\Infrastructure\Sanitizations\Sanitization;
@@ -92,6 +93,34 @@ class CouponService
       $this->repo->queryBuilder()->finishTransaction();
 
       return $updatedCoupon;
+    } catch (\Throwable $th) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $th;
+    }
+  }
+
+  public function remove(int $id): bool
+  {
+    try {
+      $this->repo->queryBuilder()->startTransaction();
+      $coupon = $this->repo->find($id);
+      if ($coupon === null) {
+        throw new Exception('Coupon not found.', 500);
+      }
+
+      $deleted = $this->repo->delete($coupon);
+      if (!$deleted) {
+        throw new CouponRemoveException();
+      }
+
+      $this->eventLog->record(
+        EventType::DELETE,
+        "Coupon removido ID {$coupon->idValue()} CODE {$coupon->codeValue()}"
+      );
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $deleted;
     } catch (\Throwable $th) {
       $this->repo->queryBuilder()->cancelTransaction();
       throw $th;
