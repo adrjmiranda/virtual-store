@@ -8,6 +8,7 @@ use App\Domain\Images\ImageableType;
 use App\Domain\Images\Path;
 use App\Domain\ValueObjects\Id;
 use App\Exceptions\ImageCreationException;
+use App\Exceptions\ImageRemoveException;
 use App\Exceptions\ImageUpdateException;
 use App\Repository\ImageRepository;
 use Exception;
@@ -166,10 +167,29 @@ class ImageService
 
   public function remove(int $id): bool
   {
+    $this->repo->queryBuilder()->startTransaction();
+
     try {
-      // ToDo:
-    } catch (\Throwable $th) {
-      throw $th;
+      $imageById = $this->repo->find($id);
+      if ($imageById === null) {
+        throw new Exception('Image not found.');
+      }
+
+      $path = $imageById->pathValue();
+
+      $deleted = $this->repo->delete($imageById);
+      if (!$deleted) {
+        throw new ImageRemoveException();
+      }
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      $this->deleteFile($path);
+
+      return true;
+    } catch (\Throwable $e) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      throw $e;
     }
   }
 }
