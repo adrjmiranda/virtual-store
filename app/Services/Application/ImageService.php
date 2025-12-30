@@ -6,8 +6,11 @@ use App\Domain\Images\Image;
 use App\Domain\Images\ImageableId;
 use App\Domain\Images\ImageableType;
 use App\Domain\Images\Path;
+use App\Domain\ValueObjects\Id;
 use App\Exceptions\ImageCreationException;
+use App\Exceptions\ImageUpdateException;
 use App\Repository\ImageRepository;
+use Exception;
 use RuntimeException;
 
 class ImageService
@@ -87,8 +90,8 @@ class ImageService
       }
 
       $this->repo->queryBuilder()->finishTransaction();
-      return $created;
 
+      return $created;
     } catch (\Throwable $e) {
       $this->repo->queryBuilder()->cancelTransaction();
       if (isset($path)) {
@@ -103,12 +106,50 @@ class ImageService
     // ToDo:
   }
 
-  public function update(int $id, array $file): string
+  public function update(int $id, array $file): Image
   {
+    $this->repo->queryBuilder()->startTransaction();
+
     try {
-      // ToDo:
-    } catch (\Throwable $th) {
-      throw $th;
+      $imageById = $this->repo->find($id);
+      if ($imageById === null) {
+        throw new Exception('Image not found.');
+      }
+
+      $oldPath = $imageById->pathValue();
+
+      $path = $this->storeFile($file, $this->uploadDir);
+
+      $image = new Image(
+        new Id($imageById->idValue()),
+        new Path($path),
+        new ImageableId($imageById->imageableIdValue()),
+        new ImageableType($imageById->imageableTypeValue()),
+        null,
+        null
+      );
+
+      $updated = $this->repo->update($image, ['path', 'imageable_id', 'imageable_type']);
+      if (!$updated) {
+        throw new ImageUpdateException();
+      }
+
+      $imageUpdated = $this->repo->find($id);
+      if (!$imageUpdated) {
+        throw new ImageUpdateException();
+      }
+
+      $this->deleteFile($oldPath);
+
+      $this->repo->queryBuilder()->finishTransaction();
+
+      return $imageUpdated;
+    } catch (\Throwable $e) {
+      $this->repo->queryBuilder()->cancelTransaction();
+      if (isset($path)) {
+        $this->deleteFile($path);
+      }
+      throw $e;
     }
   }
 
