@@ -103,7 +103,7 @@ class ImageService
 
   public function show(int $id): ?Image
   {
-    // ToDo:
+    return $this->repo->find($id);
   }
 
   public function update(int $id, array $file): Image
