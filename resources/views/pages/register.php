@@ -1,4 +1,3 @@
 <?php $this->layout('layouts/template') ?>
 
-<h1>Super</h1>
-
+<h1>Register</h1>

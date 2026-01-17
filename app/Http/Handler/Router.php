@@ -26,6 +26,8 @@ class Router
 
   private static array $globalMiddlewares = [];
 
+  private array $pathGroup = [];
+
   public function __construct(
     Container $container,
     array $enableMethods = ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS']
@@ -142,6 +144,10 @@ class Router
 
     $this->currentPath = $pathRegex;
     $this->currentMethod = $httpMethod;
+
+    if (!empty($this->prefix)) {
+      $this->pathGroup[] = [$httpMethod, $pathRegex];
+    }
   }
 
   public function group(string $prefix): self
@@ -149,6 +155,9 @@ class Router
     if (empty($prefix)) {
       throw new Exception("The route prefix cannot be empty.", 500);
     }
+
+    $this->pathGroup = [];
+
     $this->prefix = $prefix;
 
     return $this;
@@ -184,6 +193,24 @@ class Router
       self::$globalMiddlewares,
       $this->paths[$this->currentMethod][$this->currentPath]['middlewares'] ?? []
     );
+  }
+
+  public function addGroupMiddleware(string ...$names): void
+  {
+    if (!empty($this->prefix)) {
+      foreach ($names as $name) {
+        foreach ($this->pathGroup as $item) {
+          $this->paths[$item[0]][$item[1]]['middlewares'][$name] = $this->correspondingMiddleware($name);
+        }
+
+        $this->paths[$item[0]][$item[1]]['middlewares'] = array_merge(
+          self::$globalMiddlewares,
+          $this->paths[$item[0]][$item[1]]['middlewares'] ?? []
+        );
+      }
+    }
+
+    $this->prefix = '';
   }
 
   public function setGlobalMiddlewares(array $names): void

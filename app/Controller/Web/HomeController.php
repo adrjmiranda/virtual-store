@@ -10,7 +10,7 @@ class HomeController extends Controller
   {
     $view = $this->view('pages.home', [
       'title' => 'Virtual Store'
-    ], true);
+    ], true, 10);
     $response->setBody($view);
     return $response;
   }

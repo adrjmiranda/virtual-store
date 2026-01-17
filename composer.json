@@ -14,7 +14,8 @@
 			"helpers/file.php",
 			"helpers/config.php",
 			"helpers/env.php",
-			"helpers/string.php"
+			"helpers/string.php",
+			"helpers/url.php"
 		]
 	},
 	"scripts": {

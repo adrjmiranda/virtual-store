@@ -15,6 +15,13 @@ abstract class Controller
   public function __construct(Engine $engine, Cache $cache)
   {
     $this->engine = $engine;
+
+    $engineConfig = config('template');
+
+    foreach ($engineConfig['functions'] as $name => $func) {
+      $this->engine->registerFunction($name, $func);
+    }
+
     $this->cache = $cache;
   }
 
